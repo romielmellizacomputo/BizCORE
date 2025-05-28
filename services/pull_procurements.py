@@ -1,13 +1,14 @@
-# services/pull_procurements.py
-def fetch_procurements_data(service, core_sheet_id, child_id):
-    try:
-        result = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range='Procurements!G4:V').execute()
-        rows = result.get('values', [])
-        
-        # Filter rows where the business ID matches child_id
-        filtered_data = [row for row in rows if row[0] == child_id]  # Assuming B is the first column in the range
-        
-        return filtered_data
-    except Exception as e:
-        print(f"Error fetching procurements data: {e}")
-        return []
+from auth.google_auth import get_sheets_service
+from config.settings import CORE_SHEET_ID, START_ROW
+
+def fetch_procurements(child_id):
+    service = get_sheets_service()
+    sheet = service.spreadsheets()
+    range_name = f'Procurements!B{START_ROW}:V'
+    result = sheet.values().get(spreadsheetId=CORE_SHEET_ID, range=range_name).execute()
+    values = result.get('values', [])
+    filtered = []
+    for row in values:
+        if len(row) > 3 and row[3] == child_id:
+            filtered.append(row)
+    return filtered
