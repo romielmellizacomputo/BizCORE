@@ -17,8 +17,6 @@ from services.pull_meetings import fetch_meetings_data
 from services.pull_goals import fetch_goals_data
 
 
-from datetime import datetime
-
 def get_active_child_sheets():
     service = authenticate_google_sheets()
     sheet = service.spreadsheets()
@@ -34,7 +32,6 @@ def get_active_child_sheets():
     children = []
     for row in rows:
         try:
-            # Safe unpacking
             sheet_id = row[0].strip() if len(row) > 0 else None
             permissions_raw = row[5].strip() if len(row) > 5 else ""
             expiration_raw = row[7].strip() if len(row) > 7 else ""
@@ -42,13 +39,10 @@ def get_active_child_sheets():
             if not sheet_id or not permissions_raw:
                 continue
 
-            # Parse permissions (may be comma-separated list)
             permissions = [p.strip() for p in permissions_raw.split(",") if p.strip()]
-
             if not permissions:
-                continue  # no valid permissions
+                continue
 
-            # Parse expiration date
             if expiration_raw:
                 try:
                     exp_date = datetime.strptime(expiration_raw, "%a, %b %d, %Y")
@@ -58,7 +52,7 @@ def get_active_child_sheets():
                     print(f"⚠️ Skipping row with invalid date format: {expiration_raw}")
                     continue
             else:
-                continue  # missing expiration
+                continue
 
             children.append({
                 "sheet_id": sheet_id,
@@ -78,7 +72,6 @@ def insert_into_child_sheets():
 
     service = authenticate_google_sheets()
 
-    # Define sheet and their specific data ranges
     sheets_config = {
         "Products": {"data_range": "Products!G4:U", "id_range": "Products!D4:D", "name_range": "Products!B4:B"},
         "Sales": {"data_range": "Sales!G4:T", "id_range": "Sales!D4:D", "name_range": "Sales!B4:B"},
@@ -107,22 +100,34 @@ def insert_into_child_sheets():
             print(f"Processing sheet: {sheet_name}")
 
             config = sheets_config[sheet_name]
-            id_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["id_range"]).execute().get("values", [])
-            data_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["data_range"]).execute().get("values", [])
-            name_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["name_range"]).execute().get("values", [])
+            core_sheet_id = os.environ['CORE']
+
+            id_vals = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range=config["id_range"]).execute().get("values", [])
+            data_vals = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range=config["data_range"]).execute().get("values", [])
+            name_vals = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range=config["name_range"]).execute().get("values", [])
 
             matched_rows = []
             for idx, id_row in enumerate(id_vals):
                 if id_row and id_row[0].strip() == child_id:
                     name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
                     data = data_vals[idx] if idx < len(data_vals) else []
-                    matched_rows.append([name] + data)
+                    matched_rows.append(data + [name])  # <<<<<<<<<< PUT NAME AT END
 
             if not matched_rows:
                 print(f"🚫 No matching data for {sheet_name} in child {child_id}")
                 continue
 
-            target_range = config["data_range"].replace("G4", "G11").replace(":D", "")
+            # Replace "G4:U" → "G11:U" for insert range:
+            # Extract the columns from data_range, replace row 4 with 11
+            # e.g. "Products!G4:U" → "Products!G11:U"
+            sheet_range = config["data_range"]
+            sheet_name_part, cells_part = sheet_range.split("!")
+            start_cell, end_col = cells_part.split(":")
+            start_col = ''.join(filter(str.isalpha, start_cell))  # e.g. "G"
+            end_col = ''.join(filter(str.isalpha, end_col))      # e.g. "U"
+
+            target_range = f"{sheet_name_part}!{start_col}11:{end_col}"
+
             print(f"✅ Inserting {len(matched_rows)} rows into range {target_range}")
 
             service.spreadsheets().values().clear(
