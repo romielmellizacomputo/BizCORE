@@ -1,13 +1,21 @@
-# services/pull_products.py
-def fetch_products_data(service, core_sheet_id, child_id):
-    try:
-        result = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range='Products!G4:U').execute()
-        rows = result.get('values', [])
-        
-        # Filter rows where the business ID matches child_id
-        filtered_data = [row for row in rows if row[0] == child_id]  # Assuming B is the first column in the range
-        
-        return filtered_data
-    except Exception as e:
-        print(f"Error fetching products data: {e}")
-        return []
+from auth.google_auth import get_sheets_service
+from config.settings import CORE_SHEET_ID, START_ROW
+
+def fetch_products(child_id):
+    service = get_sheets_service()
+    sheet = service.spreadsheets()
+
+    # Read Products sheet columns B to U (B + G:U)
+    # We want rows where column D == child_id, data from row 4 down
+    # We'll read from B4:U (all rows starting row 4)
+
+    range_name = f'Products!B{START_ROW}:U'
+    result = sheet.values().get(spreadsheetId=CORE_SHEET_ID, range=range_name).execute()
+    values = result.get('values', [])
+
+    filtered = []
+    for row in values:
+        # Ensure the row has enough columns, check D column (index 3)
+        if len(row) > 3 and row[3] == child_id:
+            filtered.append(row)
+    return filtered
