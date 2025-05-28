@@ -1,14 +1,7 @@
-from auth.google_auth import get_sheets_service
-from config.settings import CORE_SHEET_ID, START_ROW
+from services.base_puller import fetch_and_push_data
 
-def fetch_goals(child_id):
-    service = get_sheets_service()
-    sheet = service.spreadsheets()
-    range_name = f'Business Goals!B{START_ROW}:N'
-    result = sheet.values().get(spreadsheetId=CORE_SHEET_ID, range=range_name).execute()
-    values = result.get('values', [])
-    filtered = []
-    for row in values:
-        if len(row) > 3 and row[3] == child_id:
-            filtered.append(row)
-    return filtered
+def main():
+    fetch_and_push_data("Business Goals")
+
+if __name__ == '__main__':
+    main()
