@@ -17,6 +17,8 @@ from services.pull_meetings import fetch_meetings_data
 from services.pull_goals import fetch_goals_data
 
 
+from datetime import datetime
+
 def get_active_child_sheets():
     service = authenticate_google_sheets()
     sheet = service.spreadsheets()
@@ -32,24 +34,39 @@ def get_active_child_sheets():
     children = []
     for row in rows:
         try:
+            # Safe unpacking
             sheet_id = row[0].strip() if len(row) > 0 else None
-            permissions = row[6].split(",") if len(row) > 6 else []
-            expiration = row[7] if len(row) > 7 else None
+            permissions_raw = row[5].strip() if len(row) > 5 else ""
+            expiration_raw = row[7].strip() if len(row) > 7 else ""
 
-            if expiration:
-                exp_date = datetime.strptime(expiration.strip(), "%a, %b %d, %Y")
-                if exp_date < today:
-                    continue
-            else:
+            if not sheet_id or not permissions_raw:
                 continue
 
-            cleaned_permissions = [p.strip() for p in permissions]
+            # Parse permissions (may be comma-separated list)
+            permissions = [p.strip() for p in permissions_raw.split(",") if p.strip()]
+
+            if not permissions:
+                continue  # no valid permissions
+
+            # Parse expiration date
+            if expiration_raw:
+                try:
+                    exp_date = datetime.strptime(expiration_raw, "%a, %b %d, %Y")
+                    if exp_date < today:
+                        continue
+                except Exception as e:
+                    print(f"⚠️ Skipping row with invalid date format: {expiration_raw}")
+                    continue
+            else:
+                continue  # missing expiration
+
             children.append({
                 "sheet_id": sheet_id,
-                "permissions": cleaned_permissions
+                "permissions": permissions
             })
+
         except Exception as e:
-            print(f"Skipping row due to error: {e}")
+            print(f"⚠️ Skipping row due to parsing error: {e}")
             continue
 
     return children
