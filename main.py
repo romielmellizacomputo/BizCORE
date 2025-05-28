@@ -73,67 +73,76 @@ def insert_into_child_sheets():
     service = authenticate_google_sheets()
     core_sheet_id = os.environ['CORE']
 
-    # Explicitly declared correct end columns including B (name)
     sheets_config = {
         "Products": {
             "data_range": "Products!G4:U",
             "id_range": "Products!D4:D",
             "name_range": "Products!B4:B",
-            "target_range": "Products!G11:V"  # V = U + name
+            "target_range": "Products!G11:V",  # 11 columns from G to U + 1 name column = V
+            "expected_data_columns": 11
         },
         "Sales": {
             "data_range": "Sales!G4:T",
             "id_range": "Sales!D4:D",
             "name_range": "Sales!B4:B",
-            "target_range": "Sales!G11:U"  # U = T + name
+            "target_range": "Sales!G11:U",
+            "expected_data_columns": 10
         },
         "Procurements": {
             "data_range": "Procurements!G4:V",
             "id_range": "Procurements!D4:D",
             "name_range": "Procurements!B4:B",
-            "target_range": "Procurements!G11:W"
+            "target_range": "Procurements!G11:W",
+            "expected_data_columns": 12
         },
         "Expenses": {
             "data_range": "Expenses!G4:T",
             "id_range": "Expenses!D4:D",
             "name_range": "Expenses!B4:B",
-            "target_range": "Expenses!G11:U"
+            "target_range": "Expenses!G11:U",
+            "expected_data_columns": 10
         },
         "Suppliers": {
             "data_range": "Suppliers!G4:R",
             "id_range": "Suppliers!D4:D",
             "name_range": "Suppliers!B4:B",
-            "target_range": "Suppliers!G11:S"
+            "target_range": "Suppliers!G11:S",
+            "expected_data_columns": 9
         },
         "Resellers": {
             "data_range": "Resellers!G4:R",
             "id_range": "Resellers!D4:D",
             "name_range": "Resellers!B4:B",
-            "target_range": "Resellers!G11:S"
+            "target_range": "Resellers!G11:S",
+            "expected_data_columns": 9
         },
         "Investments": {
             "data_range": "Investments!G4:S",
             "id_range": "Investments!D4:D",
             "name_range": "Investments!B4:B",
-            "target_range": "Investments!G11:T"
+            "target_range": "Investments!G11:T",
+            "expected_data_columns": 10
         },
         "Cash-Flow": {
             "data_range": "Cash-Flow!G4:N",
             "id_range": "Cash-Flow!D4:D",
             "name_range": "Cash-Flow!B4:B",
-            "target_range": "Cash-Flow!G11:O"
+            "target_range": "Cash-Flow!G11:O",
+            "expected_data_columns": 8
         },
         "Business Meetings": {
             "data_range": "Business Meetings!G4:N",
             "id_range": "Business Meetings!D4:D",
             "name_range": "Business Meetings!B4:B",
-            "target_range": "Business Meetings!G11:O"
+            "target_range": "Business Meetings!G11:O",
+            "expected_data_columns": 8
         },
         "Business Goals": {
             "data_range": "Business Goals!G4:N",
             "id_range": "Business Goals!D4:D",
             "name_range": "Business Goals!B4:B",
-            "target_range": "Business Goals!G11:O"
+            "target_range": "Business Goals!G11:O",
+            "expected_data_columns": 8
         },
     }
 
@@ -152,7 +161,6 @@ def insert_into_child_sheets():
             print(f"Processing sheet: {sheet_name}")
             config = sheets_config[sheet_name]
 
-            # Fetch relevant data
             id_vals = service.spreadsheets().values().get(
                 spreadsheetId=core_sheet_id, range=config["id_range"]
             ).execute().get("values", [])
@@ -163,12 +171,15 @@ def insert_into_child_sheets():
                 spreadsheetId=core_sheet_id, range=config["name_range"]
             ).execute().get("values", [])
 
+            expected_data_cols = config["expected_data_columns"]
             matched_rows = []
+
             for idx, id_row in enumerate(id_vals):
                 if id_row and id_row[0].strip() == child_id:
                     data = data_vals[idx] if idx < len(data_vals) else []
+                    padded_data = data + [""] * (expected_data_cols - len(data))
                     name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
-                    matched_rows.append(data + [name])  # Name appended as last column
+                    matched_rows.append(padded_data + [name])  # Name always at the end
 
             if not matched_rows:
                 print(f"🚫 No matching data for {sheet_name} in child {child_id}")
@@ -176,22 +187,20 @@ def insert_into_child_sheets():
 
             print(f"✅ Inserting {len(matched_rows)} rows into {sheet_name} -> {config['target_range']}")
 
-            # Clear target sheet range
+            # Clear existing data
             service.spreadsheets().values().clear(
                 spreadsheetId=child_id,
                 range=config["target_range"],
                 body={}
             ).execute()
 
-            # Insert data
+            # Update with new data
             service.spreadsheets().values().update(
                 spreadsheetId=child_id,
                 range=config["target_range"],
                 valueInputOption="RAW",
                 body={"values": matched_rows}
             ).execute()
-
-
 
 
 def main():
