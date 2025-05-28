@@ -1,27 +1,56 @@
-from services.pull_products import fetch_data as fetch_products
-from services.pull_sales import fetch_data as fetch_sales
-from services.pull_procurements import fetch_data as fetch_procurements
-from services.pull_expenses import fetch_data as fetch_expenses
-from services.pull_suppliers import fetch_data as fetch_suppliers
-from services.pull_resellers import fetch_data as fetch_resellers
-from services.pull_investments import fetch_data as fetch_investments
-from services.pull_cash_flow import fetch_data as fetch_cash_flow
-from services.pull_meetings import fetch_data as fetch_meetings
-from services.pull_goals import fetch_data as fetch_goals
+from services.pull_products import fetch_products_data
+from services.pull_sales import fetch_sales_data
+from services.pull_procurements import fetch_procurements_data
+from services.pull_expenses import fetch_expenses_data
+from services.pull_suppliers import fetch_suppliers_data
+from services.pull_resellers import fetch_resellers_data
+from services.pull_investments import fetch_investments_data
+from services.pull_transactions import fetch_cashflow_data
+from services.pull_meetings import fetch_meetings_data
+from services.pull_goals import fetch_goals_data
 
 def main():
-    products_data = fetch_products()
-    sales_data = fetch_sales()
-    procurements_data = fetch_procurements()
-    expenses_data = fetch_expenses()
-    suppliers_data = fetch_suppliers()
-    resellers_data = fetch_resellers()
-    investments_data = fetch_investments()
-    cash_flow_data = fetch_cash_flow()
-    meetings_data = fetch_meetings()
-    goals_data = fetch_goals()
+    print("Fetching Products Data...")
+    products = fetch_products_data()
+    print(f"Found {len(products)} records in Products")
 
-    # Process and insert data into child sheets as per your requirements
+    print("Fetching Sales Data...")
+    sales = fetch_sales_data()
+    print(f"Found {len(sales)} records in Sales")
+
+    print("Fetching Procurements Data...")
+    procurements = fetch_procurements_data()
+    print(f"Found {len(procurements)} records in Procurements")
+
+    print("Fetching Expenses Data...")
+    expenses = fetch_expenses_data()
+    print(f"Found {len(expenses)} records in Expenses")
+
+    print("Fetching Suppliers Data...")
+    suppliers = fetch_suppliers_data()
+    print(f"Found {len(suppliers)} records in Suppliers")
+
+    print("Fetching Resellers Data...")
+    resellers = fetch_resellers_data()
+    print(f"Found {len(resellers)} records in Resellers")
+
+    print("Fetching Investments Data...")
+    investments = fetch_investments_data()
+    print(f"Found {len(investments)} records in Investments")
+
+    print("Fetching Cash Flow Data...")
+    cashflow = fetch_cashflow_data()
+    print(f"Found {len(cashflow)} records in Cash-Flow")
+
+    print("Fetching Business Meetings Data...")
+    meetings = fetch_meetings_data()
+    print(f"Found {len(meetings)} records in Business Meetings")
+
+    print("Fetching Business Goals Data...")
+    goals = fetch_goals_data()
+    print(f"Found {len(goals)} records in Business Goals")
+
+    # Next steps: Apply logic to match children IDs and insert into child sheets
 
 if __name__ == "__main__":
     main()
