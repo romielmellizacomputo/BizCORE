@@ -78,7 +78,7 @@ def insert_into_child_sheets():
             "data_range": "Products!G4:U",
             "id_range": "Products!D4:D",
             "name_range": "Products!B4:B",
-            "target_range": "Products!G11:V",  # 11 columns from G to U + 1 name column = V
+            "target_range": "Products!G11:V",
             "expected_data_columns": 11
         },
         "Sales": {
@@ -172,30 +172,29 @@ def insert_into_child_sheets():
             ).execute().get("values", [])
 
             expected_data_cols = config["expected_data_columns"]
+            name_column_index = expected_data_cols  # Name goes at the end
+            total_columns = expected_data_cols + 1
+
             matched_rows = []
 
             for idx, id_row in enumerate(id_vals):
                 if id_row and id_row[0].strip() == child_id:
                     data = data_vals[idx] if idx < len(data_vals) else []
                     name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
-            
-                    # Create a row with enough columns
-                    row = [""] * max(expected_data_cols, name_column_index + 1)
-            
-                    # Fill in data, skipping the name column index
+
+                    # Prepare row with proper size
+                    row = [""] * total_columns
+
                     data_cursor = 0
-                    for col in range(len(row)):
+                    for col in range(total_columns):
                         if col == name_column_index:
-                            continue  # Skip name column
+                            continue
                         if data_cursor < len(data):
                             row[col] = data[data_cursor]
                             data_cursor += 1
-            
-                    # Insert name at the fixed column
-                    row[name_column_index] = name
-            
-                    matched_rows.append(row)
 
+                    row[name_column_index] = name
+                    matched_rows.append(row)
 
             if not matched_rows:
                 print(f"🚫 No matching data for {sheet_name} in child {child_id}")
@@ -210,7 +209,7 @@ def insert_into_child_sheets():
                 body={}
             ).execute()
 
-            # Update with new data
+            # Write new data
             service.spreadsheets().values().update(
                 spreadsheetId=child_id,
                 range=config["target_range"],
@@ -221,44 +220,34 @@ def insert_into_child_sheets():
 
 def main():
     print("Fetching Products Data...")
-    products = fetch_products_data()
-    print(f"Found {len(products)} records in Products")
+    print(f"Found {len(fetch_products_data())} records in Products")
 
     print("Fetching Sales Data...")
-    sales = fetch_sales_data()
-    print(f"Found {len(sales)} records in Sales")
+    print(f"Found {len(fetch_sales_data())} records in Sales")
 
     print("Fetching Procurements Data...")
-    procurements = fetch_procurements_data()
-    print(f"Found {len(procurements)} records in Procurements")
+    print(f"Found {len(fetch_procurements_data())} records in Procurements")
 
     print("Fetching Expenses Data...")
-    expenses = fetch_expenses_data()
-    print(f"Found {len(expenses)} records in Expenses")
+    print(f"Found {len(fetch_expenses_data())} records in Expenses")
 
     print("Fetching Suppliers Data...")
-    suppliers = fetch_suppliers_data()
-    print(f"Found {len(suppliers)} records in Suppliers")
+    print(f"Found {len(fetch_suppliers_data())} records in Suppliers")
 
     print("Fetching Resellers Data...")
-    resellers = fetch_resellers_data()
-    print(f"Found {len(resellers)} records in Resellers")
+    print(f"Found {len(fetch_resellers_data())} records in Resellers")
 
     print("Fetching Investments Data...")
-    investments = fetch_investments_data()
-    print(f"Found {len(investments)} records in Investments")
+    print(f"Found {len(fetch_investments_data())} records in Investments")
 
     print("Fetching Cash Flow Data...")
-    cashflow = fetch_cashflow_data()
-    print(f"Found {len(cashflow)} records in Cash-Flow")
+    print(f"Found {len(fetch_cashflow_data())} records in Cash-Flow")
 
     print("Fetching Business Meetings Data...")
-    meetings = fetch_meetings_data()
-    print(f"Found {len(meetings)} records in Business Meetings")
+    print(f"Found {len(fetch_meetings_data())} records in Business Meetings")
 
     print("Fetching Business Goals Data...")
-    goals = fetch_goals_data()
-    print(f"Found {len(goals)} records in Business Goals")
+    print(f"Found {len(fetch_goals_data())} records in Business Goals")
 
     print("Now inserting data into child sheets...")
     insert_into_child_sheets()
