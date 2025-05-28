@@ -1,28 +1,13 @@
+# ============================
+# utils/formatter.py (Optional, if you want to format date string)
+# ============================
 from datetime import datetime
+import locale
+locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
 
-def is_not_expired(expiry_date_str):
-    """
-    Checks if the expiry_date_str (e.g. "Thu, May 29, 2025") is today or in the future.
-    Returns True if not expired, False if expired.
-    """
+def is_not_expired(expiry_str):
     try:
-        expiry_date = datetime.strptime(expiry_date_str, "%a, %b %d, %Y")
-        today = datetime.now()
-        # Compare only date parts (ignore time)
-        return expiry_date.date() >= today.date()
-    except Exception as e:
-        # If parsing fails, consider expired or log error
+        expiry_date = datetime.strptime(expiry_str, "%a, %b %d, %Y")
+        return expiry_date >= datetime.today()
+    except Exception:
         return False
-
-def parse_permissions(perm_str):
-    """
-    Parses the permissions string from a cell (like "Products, Sales") into a list.
-    Handles cases like "ALL", "All", etc.
-    """
-    if not perm_str:
-        return []
-    perms = [p.strip().lower() for p in perm_str.split(',')]
-    if 'all' in perms:
-        return ['all']
-    return perms
-
