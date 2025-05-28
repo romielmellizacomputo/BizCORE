@@ -1,5 +1,6 @@
 import os
 import json
+import string
 from datetime import datetime
 
 from auth.google_auth import authenticate_google_sheets
@@ -66,6 +67,26 @@ def get_active_child_sheets():
     return children
 
 
+def next_column(col):
+    # Given an Excel column letter(s) like 'Z' or 'U', returns next column letter e.g. 'Z' -> 'AA', 'U' -> 'V'
+    col = col.upper()
+    result = []
+    carry = 1
+    for c in reversed(col):
+        if carry == 0:
+            result.append(c)
+        else:
+            val = (ord(c) - 64) + carry
+            if val > 26:
+                val = val - 26
+                carry = 1
+            else:
+                carry = 0
+            result.append(chr(val + 64))
+    if carry:
+        result.append('A')
+    return ''.join(reversed(result))
+
 def insert_into_child_sheets():
     children = get_active_child_sheets()
     print(f"Found {len(children)} valid child sheets.")
@@ -85,6 +106,8 @@ def insert_into_child_sheets():
         "Business Goals": {"data_range": "Business Goals!G4:N", "id_range": "Business Goals!D4:D", "name_range": "Business Goals!B4:B"},
     }
 
+    core_sheet_id = os.environ['CORE']
+
     for child in children:
         child_id = child["sheet_id"]
         permissions = child["permissions"]
@@ -100,7 +123,6 @@ def insert_into_child_sheets():
             print(f"Processing sheet: {sheet_name}")
 
             config = sheets_config[sheet_name]
-            core_sheet_id = os.environ['CORE']
 
             id_vals = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range=config["id_range"]).execute().get("values", [])
             data_vals = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range=config["data_range"]).execute().get("values", [])
@@ -111,37 +133,41 @@ def insert_into_child_sheets():
                 if id_row and id_row[0].strip() == child_id:
                     name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
                     data = data_vals[idx] if idx < len(data_vals) else []
-                    matched_rows.append(data + [name])  # <<<<<<<<<< PUT NAME AT END
+                    matched_rows.append(data + [name])  # Append name as the next column
 
             if not matched_rows:
                 print(f"🚫 No matching data for {sheet_name} in child {child_id}")
                 continue
 
-            # Replace "G4:U" → "G11:U" for insert range:
-            # Extract the columns from data_range, replace row 4 with 11
-            # e.g. "Products!G4:U" → "Products!G11:U"
-            sheet_range = config["data_range"]
-            sheet_name_part, cells_part = sheet_range.split("!")
-            start_cell, end_col = cells_part.split(":")
+            # Parse the range like "Products!G4:U"
+            sheet_name_part, cells_part = config["data_range"].split("!")
+            start_cell, end_cell = cells_part.split(":")
             start_col = ''.join(filter(str.isalpha, start_cell))  # e.g. "G"
-            end_col = ''.join(filter(str.isalpha, end_col))      # e.g. "U"
+            end_col = ''.join(filter(str.isalpha, end_cell))      # e.g. "U"
 
-            target_range = f"{sheet_name_part}!{start_col}11:{end_col}"
+            # Calculate next column after end_col
+            next_col = next_column(end_col)  # e.g. U -> V
+
+            # Prepare new target range for insertion, start row = 11 (fixed), end_col = next_col
+            target_range = f"{sheet_name_part}!{start_col}11:{next_col}"
 
             print(f"✅ Inserting {len(matched_rows)} rows into range {target_range}")
 
+            # Clear the range first
             service.spreadsheets().values().clear(
                 spreadsheetId=child_id,
                 range=target_range,
                 body={}
             ).execute()
 
+            # Update with matched rows
             service.spreadsheets().values().update(
                 spreadsheetId=child_id,
                 range=target_range,
                 valueInputOption="RAW",
                 body={"values": matched_rows}
             ).execute()
+
 
 
 def main():
