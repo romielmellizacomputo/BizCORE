@@ -59,67 +59,64 @@ def insert_into_child_sheets():
     children = get_active_child_sheets()
     print(f"Found {len(children)} valid child sheets.")
 
-    all_data = {
-        "Products": fetch_products_data(),
-        "Sales": fetch_sales_data(),
-        "Procurements": fetch_procurements_data(),
-        "Expenses": fetch_expenses_data(),
-        "Suppliers": fetch_suppliers_data(),
-        "Resellers": fetch_resellers_data(),
-        "Investments": fetch_investments_data(),
-        "Cash-Flow": fetch_cashflow_data(),
-        "Business Meetings": fetch_meetings_data(),
-        "Business Goals": fetch_goals_data()
-    }
-
-    column_ranges = {
-        "Products": "G11:U",
-        "Sales": "G11:T",
-        "Procurements": "G11:V",
-        "Expenses": "G11:T",
-        "Suppliers": "G11:R",
-        "Resellers": "G11:R",
-        "Investments": "G11:S",
-        "Cash-Flow": "G11:N",
-        "Business Meetings": "G11:N",
-        "Business Goals": "G11:N"
-    }
-
     service = authenticate_google_sheets()
+
+    # Define sheet and their specific data ranges
+    sheets_config = {
+        "Products": {"data_range": "Products!G4:U", "id_range": "Products!D4:D", "name_range": "Products!B4:B"},
+        "Sales": {"data_range": "Sales!G4:T", "id_range": "Sales!D4:D", "name_range": "Sales!B4:B"},
+        "Procurements": {"data_range": "Procurements!G4:V", "id_range": "Procurements!D4:D", "name_range": "Procurements!B4:B"},
+        "Expenses": {"data_range": "Expenses!G4:T", "id_range": "Expenses!D4:D", "name_range": "Expenses!B4:B"},
+        "Suppliers": {"data_range": "Suppliers!G4:R", "id_range": "Suppliers!D4:D", "name_range": "Suppliers!B4:B"},
+        "Resellers": {"data_range": "Resellers!G4:R", "id_range": "Resellers!D4:D", "name_range": "Resellers!B4:B"},
+        "Investments": {"data_range": "Investments!G4:S", "id_range": "Investments!D4:D", "name_range": "Investments!B4:B"},
+        "Cash-Flow": {"data_range": "Cash-Flow!G4:N", "id_range": "Cash-Flow!D4:D", "name_range": "Cash-Flow!B4:B"},
+        "Business Meetings": {"data_range": "Business Meetings!G4:N", "id_range": "Business Meetings!D4:D", "name_range": "Business Meetings!B4:B"},
+        "Business Goals": {"data_range": "Business Goals!G4:N", "id_range": "Business Goals!D4:D", "name_range": "Business Goals!B4:B"},
+    }
 
     for child in children:
         child_id = child["sheet_id"]
         permissions = child["permissions"]
+        print(f"\nProcessing child sheet: {child_id} with permissions: {permissions}")
 
-        if "ALL" in permissions or "All" in permissions:
-            perms = list(all_data.keys())
-        else:
-            perms = [p for p in permissions if p in all_data]
+        sheet_names = list(sheets_config.keys()) if "ALL" in permissions or "All" in permissions else permissions
 
-        for sheet_name in perms:
-            data = all_data[sheet_name]
-            matched_rows = []
-
-            for row in data:
-                if len(row) >= 1 and row[0].strip() == child_id:
-                    matched_rows.append(row)
-
-            if not matched_rows:
-                print(f"No data to insert for {sheet_name} in child {child_id}")
+        for sheet_name in sheet_names:
+            if sheet_name not in sheets_config:
+                print(f"⚠️ Skipping invalid permission: {sheet_name}")
                 continue
 
-            insert_range = f"{sheet_name}!{column_ranges[sheet_name]}"
-            print(f"Clearing {insert_range} in child sheet {child_id}...")
+            print(f"Processing sheet: {sheet_name}")
+
+            config = sheets_config[sheet_name]
+            id_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["id_range"]).execute().get("values", [])
+            data_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["data_range"]).execute().get("values", [])
+            name_vals = service.spreadsheets().values().get(spreadsheetId=os.environ['CORE'], range=config["name_range"]).execute().get("values", [])
+
+            matched_rows = []
+            for idx, id_row in enumerate(id_vals):
+                if id_row and id_row[0].strip() == child_id:
+                    name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
+                    data = data_vals[idx] if idx < len(data_vals) else []
+                    matched_rows.append([name] + data)
+
+            if not matched_rows:
+                print(f"🚫 No matching data for {sheet_name} in child {child_id}")
+                continue
+
+            target_range = config["data_range"].replace("G4", "G11").replace(":D", "")
+            print(f"✅ Inserting {len(matched_rows)} rows into range {target_range}")
+
             service.spreadsheets().values().clear(
                 spreadsheetId=child_id,
-                range=insert_range,
+                range=target_range,
                 body={}
             ).execute()
 
-            print(f"Inserting {len(matched_rows)} rows into {insert_range} in child sheet {child_id}")
             service.spreadsheets().values().update(
                 spreadsheetId=child_id,
-                range=insert_range,
+                range=target_range,
                 valueInputOption="RAW",
                 body={"values": matched_rows}
             ).execute()
