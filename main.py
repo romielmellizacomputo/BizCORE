@@ -79,49 +79,49 @@ def insert_into_child_sheets():
             "id_range": "Products!D4:D",
             "name_range": "Products!B4:B",
             "target_range": "Products!G11:V",
-            "expected_data_columns": 11
+            "expected_data_columns": 15
         },
         "Sales": {
             "data_range": "Sales!G4:T",
             "id_range": "Sales!D4:D",
             "name_range": "Sales!B4:B",
             "target_range": "Sales!G11:U",
-            "expected_data_columns": 10
+            "expected_data_columns": 14
         },
         "Procurements": {
             "data_range": "Procurements!G4:V",
             "id_range": "Procurements!D4:D",
             "name_range": "Procurements!B4:B",
             "target_range": "Procurements!G11:W",
-            "expected_data_columns": 12
+            "expected_data_columns": 16
         },
         "Expenses": {
             "data_range": "Expenses!G4:T",
             "id_range": "Expenses!D4:D",
             "name_range": "Expenses!B4:B",
             "target_range": "Expenses!G11:U",
-            "expected_data_columns": 10
+            "expected_data_columns": 14
         },
         "Suppliers": {
             "data_range": "Suppliers!G4:R",
             "id_range": "Suppliers!D4:D",
             "name_range": "Suppliers!B4:B",
             "target_range": "Suppliers!G11:S",
-            "expected_data_columns": 9
+            "expected_data_columns": 12
         },
         "Resellers": {
             "data_range": "Resellers!G4:R",
             "id_range": "Resellers!D4:D",
             "name_range": "Resellers!B4:B",
             "target_range": "Resellers!G11:S",
-            "expected_data_columns": 9
+            "expected_data_columns": 12
         },
         "Investments": {
             "data_range": "Investments!G4:S",
             "id_range": "Investments!D4:D",
             "name_range": "Investments!B4:B",
             "target_range": "Investments!G11:T",
-            "expected_data_columns": 10
+            "expected_data_columns": 13
         },
         "Cash-Flow": {
             "data_range": "Cash-Flow!G4:N",
