@@ -1,14 +1,14 @@
+from auth.google_auth import get_sheets_service
+from config.settings import CORE_SHEET_ID, START_ROW
 
-# services/pull_goals.py
-def fetch_goals_data(service, core_sheet_id, child_id):
-    try:
-        result = service.spreadsheets().values().get(spreadsheetId=core_sheet_id, range='Business Goals!G4:N').execute()
-        rows = result.get('values', [])
-        
-        # Filter rows where the business ID matches child_id
-        filtered_data = [row for row in rows if row[0] == child_id]  # Assuming B is the first column in the range
-        
-        return filtered_data
-    except Exception as e:
-        print(f"Error fetching goals data: {e}")
-        return []
+def fetch_goals(child_id):
+    service = get_sheets_service()
+    sheet = service.spreadsheets()
+    range_name = f'Business Goals!B{START_ROW}:N'
+    result = sheet.values().get(spreadsheetId=CORE_SHEET_ID, range=range_name).execute()
+    values = result.get('values', [])
+    filtered = []
+    for row in values:
+        if len(row) > 3 and row[3] == child_id:
+            filtered.append(row)
+    return filtered
