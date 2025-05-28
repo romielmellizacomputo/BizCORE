@@ -34,7 +34,7 @@ jobs:
       - name: Run sync scripts
         run: |
           python services/pull_products.py
-          python services/pull_revenue.py
+          python services/pull_sales.py
           python services/pull_procurements.py
           python services/pull_expenses.py
           python services/pull_suppliers.py
