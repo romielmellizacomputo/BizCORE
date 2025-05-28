@@ -3,7 +3,7 @@ from config.settings import CORE_SHEET_ID
 
 def fetch_sales_data():
     service = authenticate_google_sheets()
-    range_name = "Sales!G4:U"
+    range_name = "Sales!G4:T"
     result = service.spreadsheets().values().get(
         spreadsheetId=CORE_SHEET_ID, range=range_name
     ).execute()
