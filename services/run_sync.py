@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from config.settings import SHEETS, TARGET_START_ROW
 from services.fetch_children import fetch_active_children
 from services.insert_data import clear_and_insert
