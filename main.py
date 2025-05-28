@@ -177,9 +177,24 @@ def insert_into_child_sheets():
             for idx, id_row in enumerate(id_vals):
                 if id_row and id_row[0].strip() == child_id:
                     data = data_vals[idx] if idx < len(data_vals) else []
-                    padded_data = data + [""] * (expected_data_cols - len(data))
                     name = name_vals[idx][0] if idx < len(name_vals) and name_vals[idx] else ""
-                    matched_rows.append(padded_data + [name])  # Name always at the end
+            
+                    # Create a row with enough columns
+                    row = [""] * max(expected_data_cols, name_column_index + 1)
+            
+                    # Fill in data, skipping the name column index
+                    data_cursor = 0
+                    for col in range(len(row)):
+                        if col == name_column_index:
+                            continue  # Skip name column
+                        if data_cursor < len(data):
+                            row[col] = data[data_cursor]
+                            data_cursor += 1
+            
+                    # Insert name at the fixed column
+                    row[name_column_index] = name
+            
+                    matched_rows.append(row)
 
 
             if not matched_rows:
