@@ -1,6 +1,7 @@
+import os
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import os
 
 def authenticate_google_sheets():
     credentials = service_account.Credentials.from_service_account_info(
@@ -9,4 +10,3 @@ def authenticate_google_sheets():
     )
     service = build('sheets', 'v4', credentials=credentials)
     return service
-
