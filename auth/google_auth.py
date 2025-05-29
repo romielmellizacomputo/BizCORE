@@ -1,11 +1,15 @@
+# --- auth/google_auth.py ---
 import os
 import json
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+import gspread
+from google.oauth2.service_account import Credentials
 
-def get_gspread_service():
-    service_account_info = os.environ['BIZNEST_AGENT']
-    creds_info = json.loads(service_account_info)
-    credentials = service_account.Credentials.from_service_account_info(creds_info, scopes=["https://www.googleapis.com/auth/spreadsheets"])
-    service = build('sheets', 'v4', credentials=credentials)
-    return service
+def get_gspread_client():
+    biznest_agent = os.environ.get("BIZNEST_AGENT")
+    if not biznest_agent:
+        raise EnvironmentError("BIZNEST_AGENT secret not found")
+
+    service_account_info = json.loads(biznest_agent)
+    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+    credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
+    return gspread.authorize(credentials)
