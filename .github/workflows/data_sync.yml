@@ -1,0 +1,35 @@
+name: Google Sheet Sync to CORE DB
+
+on:
+  workflow_dispatch:
+    inputs:
+      sheet_id:
+        description: 'Google Sheet ID that triggered the sync'
+        required: true
+      sheet_name:
+        description: 'Sheet name where button was clicked'
+        required: true
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+
+    env:
+      BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
+      CORE: ${{ secrets.CORE }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Data Sync
+        run: |
+          python -m services.data_sync "${{ github.event.inputs.sheet_id }}" "${{ github.event.inputs.sheet_name }}"
