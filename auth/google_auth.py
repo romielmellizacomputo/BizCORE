@@ -4,12 +4,10 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-def get_gspread_client():
-    biznest_agent = os.environ.get("BIZNEST_AGENT")
-    if not biznest_agent:
-        raise EnvironmentError("BIZNEST_AGENT secret not found")
 
-    service_account_info = json.loads(biznest_agent)
+def get_gspread_and_raw_creds():
+    sa_info = json.loads(os.getenv("BIZNEST_AGENT"))
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
-    return gspread.authorize(credentials)
+    credentials = Credentials.from_service_account_info(sa_info, scopes=scopes)
+    client = gspread.authorize(credentials)
+    return client, credentials
