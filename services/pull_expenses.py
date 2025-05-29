@@ -1,7 +1,7 @@
 from auth.google_auth import get_service
 from config.settings import CORE_SHEET_ID, SHEET_RANGES, INSERT_START_ROW, SOURCE_BUSINESS_ID_COL, SOURCE_LABEL_COL
 
-def fetch_and_insert(sheet_name="Expenses", business_id=None, target_sheet_id=None):
+def fetch_and_insert(business_id, target_sheet_id, sheet_name="Expenses"):
     service = get_service()
     sheet_range = f"{sheet_name}!{SOURCE_BUSINESS_ID_COL}4:{SHEET_RANGES[sheet_name][-1]}"
     data = service.spreadsheets().values().get(spreadsheetId=CORE_SHEET_ID, range=sheet_range).execute().get("values", [])
