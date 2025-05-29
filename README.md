@@ -15,6 +15,14 @@ Developed and maintained by the **Se-Preneurs Alliance**, this platform is fuele
 
 ---
 
+## 🕰️ Project History
+
+- **4th Quarter of 2020**: Initial development began under the **Sinking Funds PH** organization as part of a grassroots digital finance initiative.  
+- **Early 2021**: Officially launched and adopted for operational use by **Sinking Funds PH**.  
+- **Mid-2021 to Present**: Maintained and actively used by the **Se-Preneurs Alliance**, powering digital automation for its member organizations.
+
+---
+
 ## 💼 Automate Real Business Processes (Not Just Spreadsheets)
 
 BizNestSheets goes beyond simple templates. Each system is thoughtfully designed to manage actual business operations using **smart logic, visual dashboards, and integrated workflows.** Here's what you can streamline:
