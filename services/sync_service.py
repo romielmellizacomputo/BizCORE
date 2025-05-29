@@ -1,15 +1,20 @@
 # --- services/sync_service.py ---
 from datetime import datetime
-from auth.google_auth import get_gspread_client
+import re
+import os
+
+from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP, ALL_PERMISSIONS
 
-import re
+from googleapiclient.discovery import build
+
 
 def parse_date(date_str):
     try:
         return datetime.strptime(date_str, "%a, %b %d, %Y")
     except:
         return None
+
 
 def get_valid_business_ids(sheet):
     records = sheet.worksheet("Settings").get_all_values()
@@ -25,6 +30,7 @@ def get_valid_business_ids(sheet):
             if expiry and expiry.date() >= today and permissions:
                 ids_permissions.append((biz_id, permissions))
     return ids_permissions
+
 
 def fetch_data(sheet, worksheet_name, business_id, col_start, col_end):
     worksheet = sheet.worksheet(worksheet_name)
@@ -42,20 +48,33 @@ def fetch_data(sheet, worksheet_name, business_id, col_start, col_end):
 
     return result
 
-def clear_and_insert(target_ws, start_col, data):
-    start_col_idx = ord(start_col) - ord("A")
-    end_col_idx = start_col_idx + max(len(row) for row in data) if data else start_col_idx
-    range_to_clear = f"{start_col}11:{chr(ord('A') + end_col_idx - 1)}"
-    target_ws.batch_clear([range_to_clear])
 
-    for i, row in enumerate(data):
-        cell_list = target_ws.range(f"{start_col}{11+i}:{chr(ord(start_col)+len(row)-1)}{11+i}")
-        for j, cell in enumerate(cell_list):
-            cell.value = row[j]
-        target_ws.update_cells(cell_list)
+def clear_only_values(sheet_id, range_str, creds):
+    service = build('sheets', 'v4', credentials=creds)
+    service.spreadsheets().values().clear(
+        spreadsheetId=sheet_id,
+        range=range_str,
+        body={}
+    ).execute()
+
+
+def insert_data_preserving_format(sheet_id, start_cell, data, creds):
+    service = build('sheets', 'v4', credentials=creds)
+    body = {
+        'range': start_cell,
+        'majorDimension': 'ROWS',
+        'values': data
+    }
+    service.spreadsheets().values().update(
+        spreadsheetId=sheet_id,
+        range=start_cell,
+        valueInputOption='USER_ENTERED',
+        body=body
+    ).execute()
+
 
 def run_sync():
-    client = get_gspread_client()
+    client, raw_creds = get_gspread_and_raw_creds()
     core_handler = client.open_by_key(CORE_HANDLER_SHEET_ID)
     core = client.open_by_key(CORE_SHEET_ID)
 
@@ -66,6 +85,7 @@ def run_sync():
         for perm in perms:
             if perm not in PERMISSION_SHEET_MAP:
                 continue
+
             sheet_name, col_start, col_end = PERMISSION_SHEET_MAP[perm]
             data = fetch_data(core, sheet_name, biz_id, col_start, col_end)
             if not data:
@@ -74,6 +94,23 @@ def run_sync():
             try:
                 target_sheet = client.open_by_key(biz_id)
                 target_ws = target_sheet.worksheet(sheet_name)
-                clear_and_insert(target_ws, "G", data)
+
+                # Calculate end column from data width
+                num_cols = max(len(row) for row in data)
+                start_col_idx = ord("G")
+                end_col_letter = chr(start_col_idx + num_cols - 1)
+                range_to_clear = f"G11:{end_col_letter}"
+
+                # Clear only values (preserve formatting and dropdowns)
+                clear_only_values(biz_id, f"{sheet_name}!{range_to_clear}", raw_creds)
+
+                # Insert data preserving format
+                insert_data_preserving_format(
+                    biz_id,
+                    f"{sheet_name}!G11",
+                    data,
+                    raw_creds
+                )
+
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
