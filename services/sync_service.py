@@ -5,8 +5,8 @@ import os
 
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP, ALL_PERMISSIONS
-
 from googleapiclient.discovery import build
+from utils.logger import write_log_to_sheet
 
 
 def parse_date(date_str):
@@ -111,6 +111,9 @@ def run_sync():
                     data,
                     raw_creds
                 )
+
+                # Write update log to H3
+                write_log_to_sheet(target_sheet, sheet_name)
 
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
