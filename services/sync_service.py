@@ -112,8 +112,8 @@ def run_sync():
                     raw_creds
                 )
 
-                # Write update log to H3
-                write_log_to_sheet(target_sheet, sheet_name)
+                # ✅ Fix: Pass credentials to logger
+                write_log_to_sheet(biz_id, sheet_name, raw_creds)
 
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
