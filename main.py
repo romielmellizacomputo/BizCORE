@@ -1,19 +1,33 @@
 from auth.google_auth import get_service
 from config.settings import CORE_HANDLER_SHEET_ID
 from datetime import datetime
-import services
 
+# Import each pull_* module individually
+from services import (
+    pull_products,
+    pull_sales,
+    pull_procurements,
+    pull_expenses,
+    pull_suppliers,
+    pull_resellers,
+    pull_investments,
+    pull_transactions,
+    pull_meetings,
+    pull_goals
+)
+
+# Map each sheet to the fetch_and_insert function of the corresponding module
 PERMISSIONS_MAP = {
-    "Products": services.pull_products,
-    "Sales": services.pull_sales,
-    "Procurements": services.pull_procurements,
-    "Expenses": services.pull_expenses,
-    "Suppliers": services.pull_suppliers,
-    "Resellers": services.pull_resellers,
-    "Investments": services.pull_investments,
-    "Cash-Flow": services.pull_transactions,
-    "Business Meetings": services.pull_meetings,
-    "Business Goals": services.pull_goals
+    "Products": pull_products.fetch_and_insert,
+    "Sales": pull_sales.fetch_and_insert,
+    "Procurements": pull_procurements.fetch_and_insert,
+    "Expenses": pull_expenses.fetch_and_insert,
+    "Suppliers": pull_suppliers.fetch_and_insert,
+    "Resellers": pull_resellers.fetch_and_insert,
+    "Investments": pull_investments.fetch_and_insert,
+    "Cash-Flow": pull_transactions.fetch_and_insert,
+    "Business Meetings": pull_meetings.fetch_and_insert,
+    "Business Goals": pull_goals.fetch_and_insert
 }
 
 def is_not_expired(expiration_str):
@@ -44,7 +58,7 @@ def run():
             [s for s in PERMISSIONS_MAP if s.lower() in permission_list]
         )
         for sheet in sheets_to_process:
-            PERMISSIONS_MAP[sheet].fetch_and_insert(sheet, business_id, business_id)
+            PERMISSIONS_MAP[sheet](sheet, business_id, business_id)
 
 if __name__ == "__main__":
     run()
