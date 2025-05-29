@@ -2,167 +2,181 @@
 
 **Business Nested Sheets – Centralized Online Repository for E-Systems**  
 A project of **Se-Preneurs Alliance**  
-Designed by: **Software Quality Assurance**
+Developed & Maintained by: **Romiel Melliza Computo**
 
 ---
 
 ## 🌐 About the Project
 
-**BizNestSheets-CORE** is the central automation engine of **BizNestSheets**, a powerful and intuitive suite of digital tools designed to **automate and streamline real-world business processes**. This platform is **100% free**, yet built with the professionalism and depth of paid enterprise software.
+**BizNestSheets-CORE** is the central automation engine of **BizNestSheets**, a powerful and intuitive suite of digital tools designed to **automate and streamline key business processes**. It's **100% free**, built with **professional-grade automation** systems for businesses, cooperatives, schools, freelancers, and organizations seeking digital transformation without the hefty price tag.
 
-Developed under the **Se-Preneurs Alliance**, this initiative aims to help entrepreneurs, cooperatives, and small organizations digitize their operations—**without the burden of high software costs.**
-
-> “Empowering community-driven enterprises with accessible automation tools.”
+Developed and maintained by the **Se-Preneurs Alliance**, this platform is fueled by a vision:  
+> “Empower grassroots entrepreneurs with world-class systems at no cost.”
 
 ---
 
-## 💼 Key Business Processes Covered
+## 💼 Automate Real Business Processes (Not Just Spreadsheets)
 
-BizNestSheets is more than a template—each module is designed around **actual workflows and business logic**, helping organizations **automate processes and make smarter decisions.**
+BizNestSheets goes beyond simple templates. Each system is thoughtfully designed to manage actual business operations using **smart logic, visual dashboards, and integrated workflows.** Here's what you can streamline:
+
+---
 
 ### ✅ PRODUCTS & SERVICES
-- Manage your product catalog, pricing, and bundles  
-- Track unit costs and analyze gross margins  
-- Set up lifecycle phases for product development  
-- Integrate feedback loops for product/service improvement  
+- Product catalog manager with pricing control  
+- Bundled services and package deals  
+- Unit cost tracking with margin analysis  
+- Product lifecycle status and inventory sync  
+- Feedback loop integration for product improvement  
 
 ### 💰 SALES & REVENUE
-- Track real-time sales by category, team, or period  
-- Auto-calculate daily, weekly, and monthly revenue  
-- Monitor sales pipelines and deal conversions  
-- Generate client invoices with detailed sales summaries  
+- Real-time sales dashboard with filters by location, product, or team  
+- Daily, weekly, monthly sales reports auto-calculated  
+- Sales funnel tracker with prospect-to-client conversion ratio  
+- Commission calculator for sales reps  
+- Client invoice generator with summary view  
 
-### 🛒 PROCUREMENT MANAGEMENT
-- Vendor and supplier listing with order history  
-- Purchase Requests (PR) to Purchase Orders (PO) tracking  
-- Multi-level approval workflows  
-- Inventory match and delivery receipt validation  
+### 🛒 PROCUREMENTS
+- Vendor database and approved supplier listing  
+- Purchase Request (PR) to Purchase Order (PO) flow  
+- Pending deliveries and inventory match tracking  
+- Automatic stock replenishment alerts  
+- Multi-step approvals for large orders  
 
-### 💵 CASH FLOW AUTOMATION
-- Real-time cash inflows and outflows with filters  
-- Auto-generated monthly cash flow summaries  
-- Forecast future liquidity using smart projections  
-- Link cash flow to bank/petty cash reconciliation tools  
+### 💵 CASH FLOW MANAGEMENT
+- Real-time inflow/outflow ledger with filters  
+- Monthly cash position report with charts  
+- Forecasting tool for 3, 6, or 12 months  
+- Bank account and petty cash reconciliation  
+- Auto-generated summary of daily/weekly movements  
 
-### 🧾 TRANSACTIONS MONITORING
-- Unified tracking of financial, inventory, and investment movements  
-- Tagged entries for better audit trails  
-- Filterable logs with automatic validation checks  
-- Alert system for anomalies or overdue items  
+### 🧾 TRANSACTIONS TRACKING
+- All cash, investment, and inventory movements logged  
+- Filterable by transaction type, status, or department  
+- Tagging system for easy audit trails  
+- Automated alerts for failed or delayed entries  
 
-### 📊 INVESTMENTS
-- Monitor short-term and long-term investments  
-- Calculate ROI, growth rates, and maturity timelines  
-- Categorize by account types or product groups  
-- Real-time integration with finance and cash flow modules  
+### 📊 INVESTMENT MONITORING
+- Investment accounts with portfolio summary  
+- Short-term and long-term investment analysis  
+- ROI, growth percentage, and performance index  
+- Linked to finance modules for real-time impact tracking  
+- Automated start-end duration forecast tools  
 
-### 👥 SUPPLIERS & RESELLERS
-- Onboard and track partners with detailed profiles  
-- Set credit limits, commission rules, and performance indicators  
-- Review delivery punctuality, pricing, and relationship status  
-- Provide dashboard access for high-volume resellers  
+### 👥 SUPPLIERS & RESELLERS MANAGEMENT
+- Partner onboarding sheets with contract info  
+- Discount, wholesale, and commission settings  
+- Credit term and delivery history tracker  
+- Performance rating and blacklist option  
+- Reseller performance dashboard with targets vs actual  
 
 ### 🤝 BUSINESS MEETINGS & MINUTES
-- Schedule and track meeting invites  
-- Take live notes with attendance logs  
-- Assign follow-up actions with deadline reminders  
-- Export clean PDF summaries for archives  
+- Agenda planner and invite tracker  
+- Real-time meeting notes system  
+- Attendance, decisions made, and follow-up owner tags  
+- Action item tracker with automatic reminders  
+- Printable and exportable PDF summaries  
 
 ### 🎯 BUSINESS GOALS & STRATEGY
-- Define and track short- and long-term goals  
-- Link organizational KPIs to team and individual OKRs  
-- Visualize progress using radar charts and dashboards  
-- Perform SWOT analysis and risk assessments  
+- Company goals and departmental OKRs tracker  
+- Annual and quarterly targets with progress bars  
+- SWOT analysis board  
+- Risk and contingency matrix  
+- KPI dashboard with red/yellow/green status indicators  
 
 ### 🧠 STRATEGIC PLANNING
-- Roadmap planner from vision to deliverables  
-- Budget alignment with departmental goals  
-- Compare strategic options with cost/benefit analysis  
-- Embed market research and competitor benchmarks  
+- Vision-to-roadmap link builder  
+- Scenario planning with what-if simulations  
+- Budget-based goal alignment  
+- Competitor benchmarking sheet  
+- Success metrics visualized  
 
 ### 📋 PROJECT & TASK MANAGEMENT (PMS)
-- Assign and track tasks with statuses and deadlines  
-- Auto-generate Gantt-style summaries  
-- Tag users and teams with real-time progress visualization  
-- Monitor delays, blockers, and reassignments  
+- Task tracker with start and end dates  
+- Assigned person, priority, and status  
+- Auto-progress bars per team/project  
+- Delay alert system with color codes  
+- Departmental and cross-team coordination  
 
-### 📈 PERFORMANCE ANALYTICS
-- Departmental and individual KPI dashboards  
-- Weekly performance reports with color-coded risk zones  
-- Identify bottlenecks, weak areas, and top contributors  
-- Track progress toward organizational OKRs  
+### 📈 PERFORMANCE & KPI ANALYTICS
+- Individual, team, and department KPI breakdown  
+- Scorecards auto-computed weekly  
+- Leaderboard for top performers  
+- Goal gap analysis and improvement suggestions  
 
-### 🧾 POS, INVENTORY, & SALES TRACKING
-- POS system for order processing and receipts  
-- Barcode-ready inventory system  
-- Sales reconciliation by cashier/team/branch  
-- Auto-calculate shrinkage, returns, and gross margins  
+### 🧾 SALES, INVENTORY & POS
+- Barcode-ready product list  
+- POS interface (entry-level) for recording transactions  
+- Inventory movement dashboard  
+- Stock valuation and shrinkage calculator  
+- Receipt and invoice generation  
 
-### 📌 ADDITIONAL AUTOMATIONS
-- PDF report and receipt generator  
-- Visual dashboards using charts and color codes  
-- Compatible with Google Sheets and Excel  
-- Link-sharing enabled for team collaboration  
-- Mobile-friendly layout for tablets and phones  
+### 💻 DIGITAL TOOLS & CONNECTIVITY
+- Google Sheets and Excel compatible  
+- Ready-to-print reports and forms  
+- PDF export for reports, receipts, POs, etc.  
+- Mobile-friendly layout for on-the-go updates  
+- Easily integrates with email, cloud, and link-sharing tools  
 
 ---
 
 ## 🎁 Why Use BizNestSheets?
 
-- ✅ **100% Free to Use** – No ads, fees, or licenses  
-- ✅ **Business-Centric Design** – Made for real business operations  
-- ✅ **All-in-One Solution** – Covers everything from sales to strategy  
-- ✅ **Fast Deployment** – Start using it in just minutes  
-- ✅ **Trusted by 40+ Orgs** – SMEs, co-ops, student orgs, and freelancers  
-- ✅ **Offline Ready** – No internet? No problem  
+- ✅ **100% Free to Use** – No hidden fees, ads, or limits  
+- ✅ **Built by a Business Automation Expert** – Designed by a Software Quality Assurance with real business use in mind  
+- ✅ **End-to-End Operations** – Covers front office to back office and everything in between  
+- ✅ **Used by 40+ Orgs** – Trusted by cooperatives, SMEs, student groups, and freelancers  
+- ✅ **Fast Setup** – Use as-is or tailor to your org in minutes  
+- ✅ **Offline Ready** – Works even with poor or no internet  
 
 ---
 
 ## 🔐 Access Policy & Licensing
 
-This is **not an open-source project**. Public cloning, forking, or redistribution is **strictly prohibited.**
+**NOT an open-source project. Public forking, copying, and redistribution are strictly prohibited.**
 
-### 🔓 Access Request
-To gain access, email:  
-📧 **romielmellizacomputo@gmail.com**  
-Include:
-- Your full name  
+Only verified members of the Se-Preneurs Alliance may access or use this platform.
+
+### 🔓 Request Access
+Send an email to **romielmellizacomputo@gmail.com** with:
+
+- Full Name  
 - Se-Preneurs Alliance Membership ID  
-- Organization or business name (optional)  
-- Systems you're interested in  
+- Business/Organization Name (optional)  
+- System(s) you're interested in  
 
 ---
 
-## 📜 License Agreement – Se-PA v1.0.0 (May 2025)
+## 📜 Se-Preneurs Alliance License (Se-PA v1.0.0 – May 2025)
 
-**By using BizNestSheets-CORE, you agree to:**
+By accessing this system, you agree to:
 
-1. Use the platform only within the Se-Preneurs Alliance  
-2. Not fork, resell, clone, or rebrand any part of the system  
-3. Acknowledge the intellectual property belongs to its creator  
-4. Keep shared access confidential and internal  
-5. Report bugs or misuse to the support team  
+1. Use only within Se-Preneurs Alliance  
+2. Never fork, copy, or resell any part of the platform  
+3. Acknowledge all IP rights belong to Romiel Melliza Computo  
+4. Keep access credentials confidential  
+5. Use responsibly and report misuse  
 
-Violations may lead to termination of access and legal consequences.
-
----
-
-## 📬 Contact & Community
-
-- 🌐 **Page:** [facebook.com/sepreneurs](https://www.facebook.com/sepreneurs)  
-- 📧 **Email:** romielmellizacomputo@gmail.com  
-- 👤 **System Designer:** Software Quality Assurance
+Violations will lead to permanent access revocation and legal action.
 
 ---
 
-## 🧠 Final Words
+## 📬 Connect with Us
 
-**BizNestSheets is more than spreadsheets.**  
-It’s a movement to **level the playing field** for small entrepreneurs through digital transformation.
+- 🌍 **Official Page:** [facebook.com/sepreneurs](https://www.facebook.com/sepreneurs)  
+- 📧 **Email Support:** romielmellizacomputo@gmail.com  
+- 👤 **Platform Creator:** [Romiel Melliza Computo](https://www.linkedin.com/in/romielcomputo)
 
-> “No-code. No-cost. No-limits.”
+---
 
-If your business deserves better systems—but your budget says otherwise—then this platform is for you.
+## 🧠 Final Thought
+
+**BizNestSheets isn’t just a product — it’s a movement.**  
+We're redefining how grassroots businesses can grow, lead, and scale — **without paying a single peso.**
+
+If you're ready to move from spreadsheets to **full-blown automation**, join the Se-Preneurs Alliance.  
+Because your business deserves better — and now it’s possible.
+
+> **No-code. No-cost. No-limits.**
 
 ---------------------------------------------------------------------------
 
