@@ -1,6 +1,7 @@
-google-api-python-client
+pytz
+gspread
 google-auth
+oauth2client
 google-auth-httplib2
 google-auth-oauthlib
-gspread
-oauth2client
+google-api-python-client
