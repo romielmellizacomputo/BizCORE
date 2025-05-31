@@ -6,13 +6,12 @@ import re
 from datetime import datetime
 
 import gspread
-from gspread.exceptions import APIError  # ✅ This is required
+from gspread.exceptions import APIError
 from googleapiclient.discovery import build
 
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP, ALL_PERMISSIONS
 from utils.logger import write_log_to_sheet
-
 
 
 def parse_date(date_str):
@@ -33,17 +32,10 @@ def retry_with_backoff(retries=5, backoff_in_seconds=1, allowed_errors=(Exceptio
                     if attempt == retries - 1:
                         raise
                     print(f"[Retrying] {func.__name__} failed with: {e}. Retrying in {delay:.1f}s...")
-                    time.sleep(delay + random.uniform(0, 0.5))  # jitter
+                    time.sleep(delay + random.uniform(0, 0.5))  # Add jitter
                     delay *= 2
         return wrapper
     return decorator
-
-
-def parse_date(date_str):
-    try:
-        return datetime.strptime(date_str, "%a, %b %d, %Y")
-    except:
-        return None
 
 
 @retry_with_backoff(allowed_errors=(APIError,))
@@ -52,7 +44,7 @@ def get_valid_business_ids(sheet):
     today = datetime.today().date()
     ids_permissions = []
 
-    for row in records[2:]:  # skip headers
+    for row in records[2:]:  # Skip headers
         if len(row) >= 9:
             biz_id = row[1]
             permissions = re.split(r",\s*", row[6]) if row[6] else []
@@ -61,12 +53,12 @@ def get_valid_business_ids(sheet):
             if expiry and expiry.date() >= today and permissions:
                 ids_permissions.append((biz_id, permissions))
     return ids_permissions
-    
+
 
 @retry_with_backoff(allowed_errors=(APIError,))
 def fetch_data(sheet, worksheet_name, business_id, col_start, col_end):
     worksheet = sheet.worksheet(worksheet_name)
-    all_data = worksheet.get_all_values()[3:]  # skip to row 4
+    all_data = worksheet.get_all_values()[3:]  # Skip to row 4
     result = []
 
     start_col_idx = ord(col_start) - ord("A")
@@ -80,18 +72,18 @@ def fetch_data(sheet, worksheet_name, business_id, col_start, col_end):
 
     return result
 
+
 @retry_with_backoff(allowed_errors=(APIError,))
-def clear_only_values(sheet_id, range_str, creds):
-    service = build('sheets', 'v4', credentials=creds)
+def clear_only_values_with_service(service, sheet_id, range_str):
     service.spreadsheets().values().clear(
         spreadsheetId=sheet_id,
         range=range_str,
         body={}
     ).execute()
 
+
 @retry_with_backoff(allowed_errors=(APIError,))
-def insert_data_preserving_format(sheet_id, start_cell, data, creds):
-    service = build('sheets', 'v4', credentials=creds)
+def insert_data_with_service(service, sheet_id, start_cell, data):
     body = {
         'range': start_cell,
         'majorDimension': 'ROWS',
@@ -104,52 +96,56 @@ def insert_data_preserving_format(sheet_id, start_cell, data, creds):
         body=body
     ).execute()
 
+
 @retry_with_backoff(allowed_errors=(APIError,))
 def safe_write_log_to_sheet(*args, **kwargs):
     return write_log_to_sheet(*args, **kwargs)
+
 
 def run_sync():
     client, raw_creds = get_gspread_and_raw_creds()
     core_handler = client.open_by_key(CORE_HANDLER_SHEET_ID)
     core = client.open_by_key(CORE_SHEET_ID)
+    sheets_service = build('sheets', 'v4', credentials=raw_creds)
 
     ids_permissions = get_valid_business_ids(core_handler)
 
-    for biz_id, permissions in ids_permissions:
+    for biz_index, (biz_id, permissions) in enumerate(ids_permissions):
         perms = ALL_PERMISSIONS if any(p.lower() == "all" for p in permissions) else permissions
-        for perm in perms:
+
+        for perm_index, perm in enumerate(perms):
             if perm not in PERMISSION_SHEET_MAP:
                 continue
 
             sheet_name, col_start, col_end = PERMISSION_SHEET_MAP[perm]
 
             try:
+                # Delay slightly between permission syncs to avoid quota
+                time.sleep(0.5 + random.uniform(0, 0.5))
+
                 data = fetch_data(core, sheet_name, biz_id, col_start, col_end)
                 if not data:
                     continue
 
                 target_sheet = client.open_by_key(biz_id)
-                target_ws = target_sheet.worksheet(sheet_name)
 
-                # Calculate end column from data width
+                # Calculate range width
                 num_cols = max(len(row) for row in data)
                 start_col_idx = ord("G")
                 end_col_letter = chr(start_col_idx + num_cols - 1)
-                range_to_clear = f"G11:{end_col_letter}"
+                range_to_clear = f"{sheet_name}!G11:{end_col_letter}"
 
-                # Clear only values (preserve formatting and dropdowns)
-                clear_only_values(biz_id, f"{sheet_name}!{range_to_clear}", raw_creds)
+                # Clear previous values
+                clear_only_values_with_service(sheets_service, biz_id, range_to_clear)
 
-                # Insert data preserving format
-                insert_data_preserving_format(
-                    biz_id,
-                    f"{sheet_name}!G11",
-                    data,
-                    raw_creds
-                )
+                # Insert new data
+                insert_data_with_service(sheets_service, biz_id, f"{sheet_name}!G11", data)
 
-                # Log to sheet
+                # Log sync event
                 safe_write_log_to_sheet(biz_id, sheet_name, raw_creds)
 
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
+
+        # Optional delay between each business sync
+        time.sleep(1 + random.uniform(0, 1))
