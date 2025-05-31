@@ -1,36 +1,36 @@
-name: BizNestSheets-CORE Service
+name: BizCORE Service
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: ⬇️ Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: CORE CALCULATIONS
+      - name: ⚙️ Run CORE Calculations
         env:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
         run: |
           python -c "from services.calc_service import run_calculations; run_calculations()"
 
-      - name: CORE HANDLER
+      - name: 📤 Sync to CORE_HANDLER (aggregate data from CORE)
         env:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
@@ -38,11 +38,10 @@ jobs:
         run: |
           python -c "from services.sync_to_handler import run_sync; run_sync()"
 
-      - name: BizCORE UPDATES
+      - name: 🔁 Sync CORE_HANDLER to Businesses (based on permissions)
         env:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
           CORE_HANDLER: ${{ secrets.CORE_HANDLER }}
         run: |
           python -c "from services.sync_service import run_sync; run_sync()"
-
