@@ -21,19 +21,17 @@ def parse_date(date_str):
         return None
 
 
-def retry_with_backoff(retries=5, backoff_in_seconds=1, allowed_errors=(Exception,)):
+def retry_with_backoff(initial_delay=1, allowed_errors=(Exception,), max_delay=60):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            delay = backoff_in_seconds
-            for attempt in range(retries):
+            delay = initial_delay
+            while True:
                 try:
                     return func(*args, **kwargs)
                 except allowed_errors as e:
-                    if attempt == retries - 1:
-                        raise
                     print(f"[Retrying] {func.__name__} failed with: {e}. Retrying in {delay:.1f}s...")
                     time.sleep(delay + random.uniform(0, 0.5))  # Add jitter
-                    delay *= 2
+                    delay = min(delay * 2, max_delay)  # Exponential backoff with cap
         return wrapper
     return decorator
 
@@ -121,7 +119,7 @@ def run_sync():
 
             try:
                 # Delay slightly between permission syncs to avoid quota
-                time.sleep(0.5 + random.uniform(0, 0.5))
+                time.sleep(1 + random.uniform(0, 0.5))
 
                 data = fetch_data(core, sheet_name, biz_id, col_start, col_end)
                 if not data:
@@ -147,5 +145,5 @@ def run_sync():
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
 
-        # Optional delay between each business sync
-        time.sleep(1 + random.uniform(0, 1))
+        # Delay between businesses to avoid hammering API
+        time.sleep(2 + random.uniform(0, 2))
