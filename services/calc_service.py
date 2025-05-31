@@ -48,9 +48,9 @@ def calc_products(sheet, creds):
 
     for row in data:
         try:
-            extra_cost = parse_float(row[5]) if len(row) > 5 else 0     # Products!F
             quantity = parse_float(row[11]) if len(row) > 11 else 0     # Products!L
             unit_cost = parse_float(row[13]) if len(row) > 13 else 0    # Products!N
+            extra_cost = parse_float(row[15]) if len(row) > 15 else 0   # Products!P
             product_id = row[1] if len(row) > 1 else ""                 # Products!B
 
             # Total Cost = Quantity * Unit Cost + Extra Cost
