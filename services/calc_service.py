@@ -5,6 +5,13 @@ from config.settings import CORE_SHEET_ID
 from googleapiclient.discovery import build
 
 
+def parse_float(val):
+    try:
+        return float(val.replace(',', '').replace('%', '').strip()) if val else 0
+    except:
+        return 0
+
+
 def batch_update(sheet_id, range_, values, creds):
     service = build('sheets', 'v4', credentials=creds)
     body = {'valueInputOption': 'USER_ENTERED', 'data': [{'range': range_, 'values': values}]}
@@ -28,9 +35,9 @@ def calc_products(sheet, creds):
 
     for row in data:
         try:
-            m = float(row[12]) if len(row) > 12 and row[12] else 0  # M
-            l = float(row[11]) if len(row) > 11 and row[11] else 0  # L
-            o = float(row[14]) if len(row) > 14 and row[14] else 0  # O
+            m = parse_float(row[12]) if len(row) > 12 else 0  # M
+            l = parse_float(row[11]) if len(row) > 11 else 0  # L
+            o = parse_float(row[14]) if len(row) > 14 else 0  # O
             total_cost = m * l + o
             results.append([round(total_cost, 2)])
         except:
@@ -46,7 +53,7 @@ def calc_sales(sheet, creds):
     sales_data = sales_ws.get_all_values()[3:]  # Row 4 onwards
     products_data = products_ws.get_all_values()[3:]
 
-    product_map = {row[1]: row[13] for row in products_data if len(row) > 13}  # B → N (unit price)
+    product_map = {row[1]: parse_float(row[13]) for row in products_data if len(row) > 13}  # B → N
 
     unit_prices = []
     total_amounts = []
@@ -54,17 +61,14 @@ def calc_sales(sheet, creds):
 
     for row in sales_data:
         product_id = row[11] if len(row) > 11 else ""  # L
-        quantity = float(row[14]) if len(row) > 14 and row[14] else 0  # O
+        quantity = parse_float(row[14]) if len(row) > 14 else 0  # O
 
-        unit_price = float(product_map.get(product_id, 0))
+        unit_price = product_map.get(product_id, 0)
         total_amount = unit_price * quantity
 
-        try:
-            q = float(row[16]) if len(row) > 16 else 0  # Q
-            r = float(row[17]) if len(row) > 17 else 0  # R
-            i = float(row[8]) if len(row) > 8 else 0    # I
-        except:
-            q = r = i = 0
+        q = parse_float(row[16]) if len(row) > 16 else 0  # Q
+        r = parse_float(row[17]) if len(row) > 17 else 0  # R
+        i = parse_float(row[8]) if len(row) > 8 else 0    # I
 
         revenue = total_amount - (q + r + i)
 
@@ -97,9 +101,9 @@ def calc_sellers(sheet, creds):
 
         for sale in sales_data:
             if len(sale) > 7 and sale[7] == name:  # H
-                qty = float(sale[14]) if len(sale) > 14 and sale[14] else 0  # O
-                sale_amt = float(sale[18]) if len(sale) > 18 and sale[18] else 0  # S
-                comm = float(sale[8]) if len(sale) > 8 and sale[8] else 0  # I
+                qty = parse_float(sale[14]) if len(sale) > 14 else 0  # O
+                sale_amt = parse_float(sale[18]) if len(sale) > 18 else 0  # S
+                comm = parse_float(sale[8]) if len(sale) > 8 else 0  # I
 
                 qty_sum += qty
                 sale_sum += sale_amt
@@ -121,9 +125,9 @@ def calc_investments(sheet, creds):
 
     for row in data:
         try:
-            amount = float(row[10]) if len(row) > 10 else 0  # K
-            rate = float(row[13].replace('%', '')) / 100 if len(row) > 13 else 0  # N
-            tax = float(row[14].replace('%', '')) / 100 if len(row) > 14 else 0   # O
+            amount = parse_float(row[10]) if len(row) > 10 else 0  # K
+            rate = parse_float(row[13]) / 100 if len(row) > 13 else 0  # N
+            tax = parse_float(row[14]) / 100 if len(row) > 14 else 0   # O
 
             interest = amount * rate
             taxed = interest * tax
