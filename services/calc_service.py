@@ -30,68 +30,69 @@ def run_calculations():
 
 def calc_products(sheet, creds):
     ws = sheet.worksheet("Products")
+    data = ws.get_all_values()[3:]  # Start from row 4
+    total_cost_results = []
+    remaining_results = []
+
+    # Get Sales data to compute Remaining Stocks
     sales_ws = sheet.worksheet("Sales")
+    sales_data = sales_ws.get_all_values()[3:]  # Start from row 4
 
-    products_data = ws.get_all_values()[3:]  # Row 4 onwards
-    sales_data = sales_ws.get_all_values()[3:]  # Row 4 onwards
-
-    # Build sales quantity map per product_id (SKU)
+    # Map product_id to total sold quantity from Sales sheet
     sales_qty_map = {}
     for sale in sales_data:
-        if len(sale) > 14:
-            sku = sale[11]  # Sales!L
-            qty = parse_float(sale[14])  # Sales!O
-            if sku:
-                sales_qty_map[sku] = sales_qty_map.get(sku, 0) + qty
+        product_id = sale[11] if len(sale) > 11 else ""  # Sales!L
+        qty_sold = parse_float(sale[14]) if len(sale) > 14 else 0  # Sales!O
+        if product_id:
+            sales_qty_map[product_id] = sales_qty_map.get(product_id, 0) + qty_sold
 
-    total_costs = []
-    remaining_stocks = []
-
-    for row in products_data:
+    for row in data:
         try:
-            product_id = row[1] if len(row) > 1 else ""  # Products!B
-            unit_cost = parse_float(row[13]) if len(row) > 13 else 0  # Products!N
-            quantity = parse_float(row[11]) if len(row) > 11 else 0  # Products!L
-            unit_price = parse_float(row[14]) if len(row) > 14 else 0  # Products!O
+            quantity = parse_float(row[11]) if len(row) > 11 else 0     # Products!L
+            unit_cost = parse_float(row[13]) if len(row) > 13 else 0    # Products!N
+            unit_price = parse_float(row[14]) if len(row) > 14 else 0   # Products!O
+            product_id = row[1] if len(row) > 1 else ""                 # Products!B
 
-            total_cost = unit_cost * quantity + unit_price
-            total_costs.append([round(total_cost, 2)])
+            # Total Cost = Quantity * Unit Cost
+            total_cost = quantity * unit_cost
+            total_cost_results.append([round(total_cost, 2)])
 
-            sold_qty = sales_qty_map.get(product_id, 0)
-            remaining = quantity - sold_qty
-            remaining_stocks.append([round(remaining, 2)])
+            # Remaining Stocks = Quantity - sum of sales
+            total_sold = sales_qty_map.get(product_id, 0)
+            remaining = quantity - total_sold
+            remaining_results.append([round(remaining, 2)])
         except:
-            total_costs.append([""])
-            remaining_stocks.append([""])
+            total_cost_results.append([""])
+            remaining_results.append([""])
 
-    batch_update(sheet.id, "Products!Q4:Q", total_costs, creds)  # Total Cost
-    batch_update(sheet.id, "Products!M4:M", remaining_stocks, creds)  # Remaining Stocks
-
+    batch_update(sheet.id, "Products!Q4:Q", total_cost_results, creds)
+    batch_update(sheet.id, "Products!M4:M", remaining_results, creds)
 
 
 def calc_sales(sheet, creds):
     sales_ws = sheet.worksheet("Sales")
     products_ws = sheet.worksheet("Products")
 
-    sales_data = sales_ws.get_all_values()[3:]  # Row 4 onwards
+    sales_data = sales_ws.get_all_values()[3:]
     products_data = products_ws.get_all_values()[3:]
 
-    product_map = {row[1]: parse_float(row[13]) for row in products_data if len(row) > 13}  # B → N
+    # Unit Price is in Products!O (index 14)
+    product_price_map = {row[1]: parse_float(row[14]) for row in products_data if len(row) > 14}
 
     unit_prices = []
     total_amounts = []
     revenues = []
 
     for row in sales_data:
-        product_id = row[11] if len(row) > 11 else ""  # L
-        quantity = parse_float(row[14]) if len(row) > 14 else 0  # O
+        product_id = row[11] if len(row) > 11 else ""  # Sales!L
+        quantity = parse_float(row[14]) if len(row) > 14 else 0  # Sales!O
 
-        unit_price = product_map.get(product_id, 0)
+        unit_price = product_price_map.get(product_id, 0)
         total_amount = unit_price * quantity
 
-        q = parse_float(row[16]) if len(row) > 16 else 0  # Q
-        r = parse_float(row[17]) if len(row) > 17 else 0  # R
-        i = parse_float(row[8]) if len(row) > 8 else 0    # I
+        q = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
+        r = parse_float(row[17]) if len(row) > 17 else 0  # Sales!R
+        i = parse_float(row[8]) if len(row) > 8 else 0    # Sales!I
 
         revenue = total_amount - (q + r + i)
 
