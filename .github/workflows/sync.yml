@@ -30,3 +30,10 @@ jobs:
           CORE_HANDLER: ${{ secrets.CORE_HANDLER }}
         run: |
           python -c "from services.sync_service import run_sync; run_sync()"
+
+      - name: Run Calculations
+        env:
+          BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
+          CORE: ${{ secrets.CORE }}
+        run: |
+          python -c "from services.calc_service import run_calculations; run_calculations()"
