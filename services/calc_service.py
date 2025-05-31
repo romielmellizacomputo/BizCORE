@@ -34,11 +34,11 @@ def calc_products(sheet, creds):
     total_cost_results = []
     remaining_results = []
 
-    # Get Sales data to compute Remaining Stocks
+    # Fetch sales data to compute remaining stocks
     sales_ws = sheet.worksheet("Sales")
-    sales_data = sales_ws.get_all_values()[3:]  # Start from row 4
+    sales_data = sales_ws.get_all_values()[3:]
 
-    # Map product_id to total sold quantity from Sales sheet
+    # Build a map of total sold quantity per product ID from Sales sheet
     sales_qty_map = {}
     for sale in sales_data:
         product_id = sale[11] if len(sale) > 11 else ""  # Sales!L
@@ -48,16 +48,16 @@ def calc_products(sheet, creds):
 
     for row in data:
         try:
+            extra_cost = parse_float(row[5]) if len(row) > 5 else 0     # Products!F
             quantity = parse_float(row[11]) if len(row) > 11 else 0     # Products!L
             unit_cost = parse_float(row[13]) if len(row) > 13 else 0    # Products!N
-            unit_price = parse_float(row[14]) if len(row) > 14 else 0   # Products!O
             product_id = row[1] if len(row) > 1 else ""                 # Products!B
 
-            # Total Cost = Quantity * Unit Cost
-            total_cost = quantity * unit_cost
+            # Total Cost = Quantity * Unit Cost + Extra Cost
+            total_cost = quantity * unit_cost + extra_cost
             total_cost_results.append([round(total_cost, 2)])
 
-            # Remaining Stocks = Quantity - sum of sales
+            # Remaining Stocks = Quantity - Total Sold
             total_sold = sales_qty_map.get(product_id, 0)
             remaining = quantity - total_sold
             remaining_results.append([round(remaining, 2)])
@@ -67,7 +67,6 @@ def calc_products(sheet, creds):
 
     batch_update(sheet.id, "Products!Q4:Q", total_cost_results, creds)
     batch_update(sheet.id, "Products!M4:M", remaining_results, creds)
-
 
 def calc_sales(sheet, creds):
     sales_ws = sheet.worksheet("Sales")
