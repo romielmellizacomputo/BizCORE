@@ -157,3 +157,7 @@ def run_sync_to_handler():
                 except Exception as e:
                     print(f"Error syncing {sheet_name} for {company_name}: {e}")
                 break
+
+
+def run_sync():
+    run_sync_to_handler()
