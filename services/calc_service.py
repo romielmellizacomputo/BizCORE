@@ -30,20 +30,43 @@ def run_calculations():
 
 def calc_products(sheet, creds):
     ws = sheet.worksheet("Products")
-    data = ws.get_all_values()[3:]  # Skip to row 4
-    results = []
+    sales_ws = sheet.worksheet("Sales")
 
-    for row in data:
+    products_data = ws.get_all_values()[3:]  # Row 4 onwards
+    sales_data = sales_ws.get_all_values()[3:]  # Row 4 onwards
+
+    # Build sales quantity map per product_id (SKU)
+    sales_qty_map = {}
+    for sale in sales_data:
+        if len(sale) > 14:
+            sku = sale[11]  # Sales!L
+            qty = parse_float(sale[14])  # Sales!O
+            if sku:
+                sales_qty_map[sku] = sales_qty_map.get(sku, 0) + qty
+
+    total_costs = []
+    remaining_stocks = []
+
+    for row in products_data:
         try:
-            m = parse_float(row[12]) if len(row) > 12 else 0  # M
-            l = parse_float(row[11]) if len(row) > 11 else 0  # L
-            o = parse_float(row[14]) if len(row) > 14 else 0  # O
-            total_cost = m * l + o
-            results.append([round(total_cost, 2)])
-        except:
-            results.append([""])
+            product_id = row[1] if len(row) > 1 else ""  # Products!B
+            unit_cost = parse_float(row[13]) if len(row) > 13 else 0  # Products!N
+            quantity = parse_float(row[11]) if len(row) > 11 else 0  # Products!L
+            unit_price = parse_float(row[14]) if len(row) > 14 else 0  # Products!O
 
-    batch_update(sheet.id, "Products!P4:P", results, creds)
+            total_cost = unit_cost * quantity + unit_price
+            total_costs.append([round(total_cost, 2)])
+
+            sold_qty = sales_qty_map.get(product_id, 0)
+            remaining = quantity - sold_qty
+            remaining_stocks.append([round(remaining, 2)])
+        except:
+            total_costs.append([""])
+            remaining_stocks.append([""])
+
+    batch_update(sheet.id, "Products!Q4:Q", total_costs, creds)  # Total Cost
+    batch_update(sheet.id, "Products!M4:M", remaining_stocks, creds)  # Remaining Stocks
+
 
 
 def calc_sales(sheet, creds):
