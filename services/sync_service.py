@@ -1,13 +1,18 @@
 # --- services/sync_service.py ---
-from datetime import datetime
-import re
-import os
 import time
 import random
+import os
+import re
+from datetime import datetime
+
+import gspread
+from gspread.exceptions import APIError  # ✅ This is required
+from googleapiclient.discovery import build
+
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP, ALL_PERMISSIONS
-from googleapiclient.discovery import build
 from utils.logger import write_log_to_sheet
+
 
 
 def parse_date(date_str):
