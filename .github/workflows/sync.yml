@@ -30,15 +30,8 @@ jobs:
         run: |
           python -c "from services.calc_service import run_calculations; run_calculations()"
 
-      - name: 📤 Sync to CORE_HANDLER (aggregate data from CORE)
-        env:
-          BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
-          CORE: ${{ secrets.CORE }}
-          CORE_HANDLER: ${{ secrets.CORE_HANDLER }}
-        run: |
-          python -c "from services.sync_to_handler import run_sync; run_sync()"
 
-      - name: 🔁 Sync CORE_HANDLER to Businesses (based on permissions)
+      - name: 🔁 Sync CORE to Businesses (based on permissions)
         env:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
