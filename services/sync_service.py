@@ -82,12 +82,28 @@ def run_sync():
 
     for biz_id, permissions in ids_permissions:
         perms = ALL_PERMISSIONS if any(p.lower() == "all" for p in permissions) else permissions
+
         for perm in perms:
             if perm not in PERMISSION_SHEET_MAP:
                 continue
 
             sheet_name, col_start, col_end = PERMISSION_SHEET_MAP[perm]
-            data = fetch_data(core, sheet_name, biz_id, col_start, col_end)
+
+            # Add retry mechanism with exponential backoff
+            for attempt in range(5):  # max 5 attempts
+                try:
+                    data = fetch_data(core, sheet_name, biz_id, col_start, col_end)
+                    break  # success
+                except APIError as e:
+                    if "Quota exceeded" in str(e) and attempt < 4:
+                        sleep_time = 2 ** attempt + random.uniform(0, 1)
+                        print(f"[Retry {attempt+1}] Quota hit. Sleeping for {sleep_time:.2f} seconds...")
+                        time.sleep(sleep_time)
+                    else:
+                        print(f"Error fetching data for {biz_id} in {sheet_name}: {e}")
+                        data = []
+                        break
+
             if not data:
                 continue
 
@@ -95,25 +111,23 @@ def run_sync():
                 target_sheet = client.open_by_key(biz_id)
                 target_ws = target_sheet.worksheet(sheet_name)
 
-                # Calculate end column from data width
                 num_cols = max(len(row) for row in data)
                 start_col_idx = ord("G")
                 end_col_letter = chr(start_col_idx + num_cols - 1)
                 range_to_clear = f"G11:{end_col_letter}"
 
-                # Clear only values (preserve formatting and dropdowns)
                 clear_only_values(biz_id, f"{sheet_name}!{range_to_clear}", raw_creds)
-
-                # Insert data preserving format
                 insert_data_preserving_format(
                     biz_id,
                     f"{sheet_name}!G11",
                     data,
                     raw_creds
                 )
-
-                # ✅ Fix: Pass credentials to logger
                 write_log_to_sheet(biz_id, sheet_name, raw_creds)
+
+                # Add a short delay between full operations
+                time.sleep(1.2)  # reduce this as needed
 
             except Exception as e:
                 print(f"Error inserting into {sheet_name} for {biz_id}: {e}")
+
