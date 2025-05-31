@@ -1,40 +1,42 @@
-# --- services/sync_to_handler.py ---
+# --- sync_to_handler.py ---
+
 from datetime import datetime
-import os
+import re
 
 from auth.google_auth import get_gspread_and_raw_creds
-from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP
+from config.settings import CORE_SHEET_ID, CORE_HANDLER_SHEET_ID, PERMISSION_SHEET_MAP, ALL_PERMISSIONS
 from googleapiclient.discovery import build
 from utils.logger import write_log_to_sheet
 
 
-def fetch_business_sheets(core):
-    """Returns a list of (worksheet, business_name) from the CORE workbook."""
-    business_sheets = []
-    for ws in core.worksheets():
-        try:
-            company_name = ws.acell("C4").value
-            if company_name:
-                business_sheets.append((ws, company_name))
-        except Exception:
-            continue
-    return business_sheets
-
-
-def fetch_data_from_ws(ws, col_start, col_end):
-    all_data = ws.get_all_values()[3:]  # start from row 4
-    result = []
-
+def fetch_all_data(sheet, worksheet_name, col_start, col_end):
+    """
+    Fetch all data starting from row 4 (index 3), all rows, between col_start and col_end.
+    """
+    worksheet = sheet.worksheet(worksheet_name)
+    all_data = worksheet.get_all_values()[3:]  # skip first 3 rows (header)
     start_col_idx = ord(col_start) - ord("A")
     end_col_idx = ord(col_end) - ord("A") + 1
 
+    result = []
     for row in all_data:
-        if len(row) > 1 and row[1]:  # ensure key column exists
-            row_key = row[1]
-            row_data = row[start_col_idx:end_col_idx]
-            result.append([row_key] + row_data)
-
+        row_data = row[start_col_idx:end_col_idx]
+        result.append(row_data)
     return result
+
+
+def fetch_business_names(sheet):
+    """
+    Fetch business/company names from CORE sheet column C starting from row 4.
+    """
+    worksheet = sheet.worksheet("Settings")  # assuming business names are in a 'Settings' or main sheet
+    # Or fetch from the main sheet if specified
+    # For flexibility, let's assume business names are in 'Businesses' sheet or 'CORE' main sheet:
+
+    # Let's try main sheet, assuming business names in C4:C (index 3 onward)
+    worksheet = sheet.get_worksheet(0)  # first sheet
+    names = worksheet.col_values(3)[3:]  # col C index=3, skip first 3 rows
+    return names
 
 
 def clear_only_values(sheet_id, range_str, creds):
@@ -61,103 +63,123 @@ def insert_data_preserving_format(sheet_id, start_cell, data, creds):
     ).execute()
 
 
-def add_notes_to_column(sheet_id, sheet_name, start_row, num_notes, note_text, creds):
-    """Add note_text to G-column cells (G11 and downward)"""
+def add_notes_to_cells(sheet_id, sheet_name, notes_range, notes, creds):
+    """
+    Add notes (comments) to cells in the notes_range with given notes list.
+
+    notes_range: e.g. 'G11:G100'
+    notes: list of strings, one per cell in the range
+    """
     service = build('sheets', 'v4', credentials=creds)
 
-    requests = []
-    start_row_index = start_row - 1  # API uses 0-based index
+    # Convert A1 notation range to grid range
+    spreadsheet = service.spreadsheets().get(spreadsheetId=sheet_id).execute()
+    sheets = spreadsheet['sheets']
+    sheet_id_int = None
+    for s in sheets:
+        if s['properties']['title'] == sheet_name:
+            sheet_id_int = s['properties']['sheetId']
+            break
+    if sheet_id_int is None:
+        raise ValueError(f"Sheet '{sheet_name}' not found in spreadsheet {sheet_id}")
 
-    for i in range(num_notes):
+    # Parse notes_range like G11:Gxxx
+    # Assume single column
+    import re
+    m = re.match(r'([A-Z]+)(\d+):([A-Z]+)(\d+)', notes_range)
+    if not m:
+        raise ValueError(f"Invalid range: {notes_range}")
+
+    start_col, start_row, end_col, end_row = m.groups()
+    start_row = int(start_row) - 1  # zero-indexed
+    end_row = int(end_row) - 1
+
+    # Build requests for batchUpdate
+    requests = []
+    for i, note in enumerate(notes):
         requests.append({
             "updateCells": {
                 "range": {
-                    "sheetId": get_sheet_id_by_name(sheet_id, sheet_name, creds),
-                    "startRowIndex": start_row_index + i,
-                    "endRowIndex": start_row_index + i + 1,
-                    "startColumnIndex": 6,  # Column G
-                    "endColumnIndex": 7
+                    "sheetId": sheet_id_int,
+                    "startRowIndex": start_row + i,
+                    "endRowIndex": start_row + i + 1,
+                    "startColumnIndex": ord(start_col) - ord('A'),
+                    "endColumnIndex": ord(start_col) - ord('A') + 1,
                 },
                 "rows": [{
                     "values": [{
-                        "note": note_text
+                        "note": note
                     }]
                 }],
                 "fields": "note"
             }
         })
 
+    body = {
+        "requests": requests
+    }
     service.spreadsheets().batchUpdate(
         spreadsheetId=sheet_id,
-        body={"requests": requests}
+        body=body
     ).execute()
 
 
-def get_sheet_id_by_name(sheet_id, sheet_name, creds):
-    """Helper to get sheet ID from name."""
-    service = build('sheets', 'v4', credentials=creds)
-    spreadsheet = service.spreadsheets().get(spreadsheetId=sheet_id).execute()
-    for sheet in spreadsheet['sheets']:
-        if sheet['properties']['title'] == sheet_name:
-            return sheet['properties']['sheetId']
-    raise ValueError(f"Sheet {sheet_name} not found")
-
-
-def run_sync_to_handler():
+def run_sync():
     client, raw_creds = get_gspread_and_raw_creds()
-    core = client.open_by_key(CORE_SHEET_ID)
     core_handler = client.open_by_key(CORE_HANDLER_SHEET_ID)
+    core = client.open_by_key(CORE_SHEET_ID)
 
-    business_sheets = fetch_business_sheets(core)
+    # Fetch all business names from CORE sheet (column C, row 4+)
+    business_names = fetch_business_names(core)
 
-    for ws, company_name in business_sheets:
-        sheet_name = ws.title
-
-        if sheet_name not in [info[0] for info in PERMISSION_SHEET_MAP.values()]:
+    # We assume business_names align with rows in data, i.e. first data row in sheets corresponds to business_names[0], etc.
+    # For each permission, fetch all data from CORE and insert into CORE_HANDLER.
+    for perm in ALL_PERMISSIONS:
+        if perm not in PERMISSION_SHEET_MAP:
             continue
 
-        # Find mapping for this sheet
-        for perm, (perm_sheet_name, col_start, col_end) in PERMISSION_SHEET_MAP.items():
-            if perm_sheet_name == sheet_name:
-                data = fetch_data_from_ws(ws, col_start, col_end)
-                if not data:
-                    continue
+        sheet_name, col_start, col_end = PERMISSION_SHEET_MAP[perm]
 
-                try:
-                    target_ws = core_handler.worksheet(sheet_name)
+        data = fetch_all_data(core, sheet_name, col_start, col_end)
+        if not data:
+            continue
 
-                    num_cols = max(len(row) for row in data)
-                    start_col_idx = ord("G")
-                    end_col_letter = chr(start_col_idx + num_cols - 1)
-                    range_to_clear = f"G11:{end_col_letter}"
+        # Insert data into CORE_HANDLER starting at G11 (same place)
+        # Prepare the note comments to add business name per row at G column cells
+        # Length of data rows might be more than business_names - handle gracefully
 
-                    # Clear values only
-                    clear_only_values(CORE_HANDLER_SHEET_ID, f"{sheet_name}!{range_to_clear}", raw_creds)
+        # Clear range G11:... depending on data width and length
+        num_cols = max(len(row) for row in data)
+        num_rows = len(data)
+        start_col_idx = ord("G")
+        end_col_letter = chr(start_col_idx + num_cols - 1)
+        end_row = 11 + num_rows - 1
+        range_to_clear = f"{sheet_name}!G11:{end_col_letter}{end_row}"
 
-                    # Insert values
-                    insert_data_preserving_format(
-                        CORE_HANDLER_SHEET_ID,
-                        f"{sheet_name}!G11",
-                        data,
-                        raw_creds
-                    )
+        # Clear values only (keep formatting)
+        clear_only_values(CORE_HANDLER_SHEET_ID, range_to_clear, raw_creds)
 
-                    # Add notes on column G with the company name
-                    add_notes_to_column(
-                        CORE_HANDLER_SHEET_ID,
-                        sheet_name,
-                        start_row=11,
-                        num_notes=len(data),
-                        note_text=company_name,
-                        creds=raw_creds
-                    )
+        # Insert data
+        insert_data_preserving_format(
+            CORE_HANDLER_SHEET_ID,
+            f"{sheet_name}!G11",
+            data,
+            raw_creds
+        )
 
-                    write_log_to_sheet(CORE_HANDLER_SHEET_ID, sheet_name, raw_creds)
+        # Add notes to G11:G?? with company names
+        notes_range = f"G11:G{end_row}"
+        # Use business_names for notes - fallback empty string if out of range
+        notes = []
+        for i in range(num_rows):
+            note = business_names[i] if i < len(business_names) else ""
+            notes.append(note)
 
-                except Exception as e:
-                    print(f"Error syncing {sheet_name} for {company_name}: {e}")
-                break
+        add_notes_to_cells(CORE_HANDLER_SHEET_ID, sheet_name, notes_range, notes, raw_creds)
+
+        # Log the sync
+        write_log_to_sheet(CORE_HANDLER_SHEET_ID, sheet_name, raw_creds)
 
 
-def run_sync():
-    run_sync_to_handler()
+if __name__ == "__main__":
+    run_sync()
