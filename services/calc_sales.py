@@ -91,7 +91,7 @@ def calc_sales(sheet, creds):
     batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission
     batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # Income Tax Value
-    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenues, creds)           # Revenue (Net)
+    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenues_values, creds)           # Revenue (Net)
 
 
 def run_calculations():
