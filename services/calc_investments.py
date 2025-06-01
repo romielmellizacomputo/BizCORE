@@ -1,4 +1,3 @@
-# --- services/calc_investments.py ---
 import os
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID
@@ -6,6 +5,7 @@ from googleapiclient.discovery import build
 
 def parse_float(val):
     try:
+        # Remove commas and percent signs, convert to float
         return float(val.replace(',', '').replace('%', '').strip()) if val else 0
     except:
         return 0
@@ -15,30 +15,36 @@ def batch_update(sheet_id, range_, values, creds):
     body = {'valueInputOption': 'USER_ENTERED', 'data': [{'range': range_, 'values': values}]}
     service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
 
-def calc_investments(sheet, creds):
-    ws = sheet.worksheet("Investments")
-    data = ws.get_all_values()[3:]
-    results = []
+def update_investments(sheet, creds):
+    print("Fetching Investments worksheet...")
+    invest_ws = sheet.worksheet("Investments")
+
+    print("Fetching data from Investments sheet...")
+    data = invest_ws.get_all_values()[3:]  # Rows from 4 onwards (index 3)
+
+    print(f"Loaded {len(data)} rows from Investments")
+
+    proceeds_values = []
 
     for row in data:
-        try:
-            amount = parse_float(row[10]) if len(row) > 10 else 0  # K
-            rate = parse_float(row[13]) / 100 if len(row) > 13 else 0  # N
-            tax = parse_float(row[14]) / 100 if len(row) > 14 else 0   # O
+        investment_amount = parse_float(row[10])  # K column is index 10
+        interest_rate = parse_float(row[13]) / 100  # N column is index 13 (convert % to decimal)
+        tax_rate = parse_float(row[14]) / 100       # O column is index 14 (convert % to decimal)
 
-            interest = amount * rate
-            taxed = interest * tax
-            net = amount + (interest - taxed)
-            results.append([round(net, 2)])
-        except:
-            results.append([""])
+        interest_amount = investment_amount * interest_rate
+        net = interest_amount * tax_rate
+        proceeds = investment_amount + net
 
-    batch_update(sheet.id, "Investments!P4:P", results, creds)
+        proceeds_values.append([round(proceeds, 2)])  # Round to 2 decimals for clarity
+
+    end_row = 3 + len(data)  # Because data starts from row 4 (index 3)
+
+    print(f"Updating Proceeds column P4:P{end_row} with calculated values...")
+    batch_update(sheet.id, f"Investments!P4:P{end_row}", proceeds_values, creds)
+    print("Update complete.")
 
 def run_calculations():
-    client, raw_creds = get_gspread_and_raw_creds()
-    sheet = client.open_by_key(CORE_SHEET_ID)
-    calc_investments(sheet, raw_creds)
-
-if __name__ == "__main__":
-    run_calculations()
+    print("Authenticating and opening sheet...")
+    gc, creds = get_gspread_and_raw_creds()
+    sheet = gc.open_by_key(CORE_SHEET_ID)
+    update_investments(sheet, creds)
