@@ -15,46 +15,59 @@ def batch_update(sheet_id, range_, values, creds):
     body = {'valueInputOption': 'USER_ENTERED', 'data': [{'range': range_, 'values': values}]}
     service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
 
-def calc_sellers(sheet, creds):
+def update_sellers(sheet, creds):
+    print("Fetching worksheets...")
     sellers_ws = sheet.worksheet("Sellers")
     sales_ws = sheet.worksheet("Sales")
 
-    sellers_data = sellers_ws.get_all_values()[3:]
-    sales_data = sales_ws.get_all_values()[3:]
+    print("Fetching data...")
+    sellers_data = sellers_ws.get_all_values()[3:]  # Sellers rows from 4 onwards (index 3)
+    sales_data = sales_ws.get_all_values()[3:]      # Sales rows from 4 onwards (index 3)
 
-    items_sold = []
-    total_sales = []
-    commissions = []
+    print(f"Loaded {len(sellers_data)} sellers, {len(sales_data)} sales rows")
 
-    for seller_row in sellers_data:
-        name = seller_row[6] if len(seller_row) > 6 else ""  # Sellers!G
+    # Map seller name to sums: total sold items, total sales, total commissions
+    # Sales sheet: seller name col H (index 7), sold items col O (index 14),
+    # total sales col P (index 15), commissions col I (index 8)
 
-        qty_sum = 0
-        sale_sum = 0
-        comm_sum = 0
+    seller_totals = {}
 
-        for sale in sales_data:
-            if len(sale) > 7 and sale[7] == name:  # Sales!H matches Sellers!G
-                qty = parse_float(sale[14]) if len(sale) > 14 else 0  # Sales!O
-                sale_amt = parse_float(sale[18]) if len(sale) > 18 else 0  # Sales!P
-                comm = parse_float(sale[8]) if len(sale) > 8 else 0  # Sales!I
+    for row in sales_data:
+        seller_name = row[7] if len(row) > 7 else ""
+        sold_items = parse_float(row[14]) if len(row) > 14 else 0
+        total_sales = parse_float(row[15]) if len(row) > 15 else 0
+        commissions = parse_float(row[8]) if len(row) > 8 else 0
 
-                qty_sum += qty
-                sale_sum += sale_amt
-                comm_sum += comm
+        if seller_name:
+            if seller_name not in seller_totals:
+                seller_totals[seller_name] = {'sold_items': 0, 'total_sales': 0, 'commissions': 0}
+            seller_totals[seller_name]['sold_items'] += sold_items
+            seller_totals[seller_name]['total_sales'] += total_sales
+            seller_totals[seller_name]['commissions'] += commissions
 
-        items_sold.append([qty_sum])
-        total_sales.append([round(sale_sum, 2)])
-        commissions.append([round(comm_sum, 2)])
+    total_sold_items_list = []
+    total_sales_list = []
+    total_commissions_list = []
 
-    batch_update(sheet.id, "Sellers!L4:L", items_sold, creds)
-    batch_update(sheet.id, "Sellers!M4:M", total_sales, creds)
-    batch_update(sheet.id, "Sellers!O4:O", commissions, creds)
+    for row in sellers_data:
+        seller_name = row[6] if len(row) > 6 else ""  # Sellers!G (index 6)
+        totals = seller_totals.get(seller_name, {'sold_items': 0, 'total_sales': 0, 'commissions': 0})
+
+        total_sold_items_list.append([totals['sold_items']])
+        total_sales_list.append([totals['total_sales']])
+        total_commissions_list.append([totals['commissions']])
+
+    end_row = 3 + len(sellers_data)  # Because data starts at row 4
+
+    batch_update(sheet.id, f"Sellers!L4:L{end_row}", total_sold_items_list, creds)   # Total Sold Items (L)
+    batch_update(sheet.id, f"Sellers!M4:M{end_row}", total_sales_list, creds)        # Total Sales (M)
+    batch_update(sheet.id, f"Sellers!O4:O{end_row}", total_commissions_list, creds)  # Total Commissions (O)
+
 
 def run_calculations():
-    client, raw_creds = get_gspread_and_raw_creds()
-    sheet = client.open_by_key(CORE_SHEET_ID)
-    calc_sellers(sheet, raw_creds)
+    print("Authenticating and opening sheet...")
+    gc, creds = get_gspread_and_raw_creds()
+    sheet = gc.open_by_key(CORE_SHEET_ID)
+    update_products(sheet, creds)
+    update_sellers(sheet, creds)
 
-if __name__ == "__main__":
-    run_calculations()
