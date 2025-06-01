@@ -62,24 +62,22 @@ def calc_sales(sheet, creds):
         vat_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0   # Sales!S
         vat_value = subtotal * (vat_tax_percentage / 100)
 
-        total_amount = subtotal + vat_value
+        discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
+        discount_value = subtotal * (discount_percentage / 100)
+
+        # Updated total amount calculation as per your request:
+        total_amount = subtotal + vat_value - discount_value
 
         commission_rate = seller_commission_map.get(seller_name, 0)
-        # **Here is the updated commission calculation:**
-        # Using total sales from Sales!P (index 15) instead of subtotal + vat_value
-        total_sales_amount = parse_float(row[15]) if len(row) > 15 else total_amount
-        commission_value = total_sales_amount * commission_rate
+        commission_value = total_amount * commission_rate
 
-        discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
-        discount_value = total_sales_amount * (discount_percentage / 100)
-
-        revenue = total_sales_amount - discount_value - vat_value - commission_value
+        revenue = total_amount - commission_value - vat_value
 
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
         income_tax_value = revenue * (income_tax_percentage / 100)
 
         unit_prices.append([unit_price])
-        total_amounts.append([total_sales_amount])
+        total_amounts.append([total_amount])
         discounts.append([discount_value])
         vat_values.append([vat_value])
         commission_values.append([commission_value])
@@ -89,7 +87,7 @@ def calc_sales(sheet, creds):
     end_row = 3 + len(sales_data)
 
     batch_update(sheet.id, f"Sales!N4:N{end_row}", unit_prices, creds)        # Unit Price
-    batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount (using Sales!P for total sales)
+    batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount (updated calc)
     batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount Value
     batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT Value
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value (updated logic)
