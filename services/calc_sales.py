@@ -36,7 +36,7 @@ def calc_sales(sheet, creds):
     print(f"Loaded {len(sales_data)} sales rows, {len(products_data)} products, {len(sellers_data)} sellers")
 
     # Product price map: product_id at index 1, price at index 14 (column O)
-    product_price_map = {row[1]: parse_float(row[14]) for row in products_data if len(row) > 14}
+    product_price_map = {row[1]: parse_float(row[16]) for row in products_data if len(row) > 16}
 
     # Seller commission map: seller name at index 6 (G), commission rate % at index 13 (N)
     seller_commission_map = {row[6]: parse_float(row[13]) / 100 for row in sellers_data if len(row) > 13}
