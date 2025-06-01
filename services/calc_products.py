@@ -16,49 +16,66 @@ def batch_update(sheet_id, range_, values, creds):
     service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
 
 def calc_products(sheet, creds):
-    ws = sheet.worksheet("Products")
-    data = ws.get_all_values()[3:]  # Start from row 4
-    total_cost_results = []
-    remaining_results = []
-
-    # Fetch sales data to compute remaining stocks
+    print("Fetching worksheets...")
+    products_ws = sheet.worksheet("Products")
     sales_ws = sheet.worksheet("Sales")
-    sales_data = sales_ws.get_all_values()[3:]
 
-    # Build a map of total sold quantity per product ID from Sales sheet
+    print("Fetching data...")
+    products_data = products_ws.get_all_values()[3:]  # Products rows from 4 onwards
+    sales_data = sales_ws.get_all_values()[3:]        # Sales rows from 4 onwards
+
+    print(f"Loaded {len(products_data)} products, {len(sales_data)} sales rows")
+
+    # Map product_id to total quantity sold (from Sales sheet)
     sales_qty_map = {}
-    for sale in sales_data:
-        product_id = sale[11] if len(sale) > 11 else ""  # Sales!L
-        qty_sold = parse_float(sale[14]) if len(sale) > 14 else 0  # Sales!O
+    for row in sales_data:
+        product_id = row[11] if len(row) > 11 else ""  # Sales!L
+        quantity_sold = parse_float(row[14]) if len(row) > 14 else 0  # Sales!O
         if product_id:
-            sales_qty_map[product_id] = sales_qty_map.get(product_id, 0) + qty_sold
+            sales_qty_map[product_id] = sales_qty_map.get(product_id, 0) + quantity_sold
 
-    for row in data:
-        try:
-            quantity = parse_float(row[11]) if len(row) > 11 else 0     # Products!L
-            unit_cost = parse_float(row[13]) if len(row) > 13 else 0    # Products!N
-            extra_cost = parse_float(row[15]) if len(row) > 15 else 0   # Products!P
-            product_id = row[1] if len(row) > 1 else ""                 # Products!B
+    remaining_stocks = []
+    vat_values = []
+    total_costs = []
+    unit_prices = []
 
-            # Total Cost = Quantity * Unit Cost + Extra Cost
-            total_cost = quantity * unit_cost + extra_cost
-            total_cost_results.append([round(total_cost, 2)])
+    for row in products_data:
+        product_id = row[1] if len(row) > 1 else ""     # Products!B
+        quantity = parse_float(row[11]) if len(row) > 11 else 0  # Products!L
+        unit_cost = parse_float(row[13]) if len(row) > 13 else 0  # Products!N
+        shipping_fee = parse_float(row[17]) if len(row) > 17 else 0  # Products!R
+        vat_rate = parse_float(row[14]) / 100 if len(row) > 14 else 0  # Products!O
+        unit_price = parse_float(row[15]) if len(row) > 15 else 0  # Products!P
 
-            # Remaining Stocks = Quantity - Total Sold
-            total_sold = sales_qty_map.get(product_id, 0)
-            remaining = quantity - total_sold
-            remaining_results.append([round(remaining, 2)])
-        except:
-            total_cost_results.append([""])
-            remaining_results.append([""])
+        total_sold_qty = sales_qty_map.get(product_id, 0)
+        remaining_qty = quantity - total_sold_qty
 
-    batch_update(sheet.id, "Products!Q4:Q", total_cost_results, creds)
-    batch_update(sheet.id, "Products!M4:M", remaining_results, creds)
+        # VAT Value = Unit Price × VAT %
+        vat_value = unit_price * vat_rate
 
-def run_calculations():
-    client, raw_creds = get_gspread_and_raw_creds()
-    sheet = client.open_by_key(CORE_SHEET_ID)
-    calc_products(sheet, raw_creds)
+        # Total Cost = (Unit Cost × Quantity) + Shipping Fee
+        total_cost = (unit_cost * quantity) + shipping_fee
 
-if __name__ == "__main__":
-    run_calculations()
+        # Unit Price = (Total Cost ÷ Quantity) + VAT Value
+        calculated_unit_price = (total_cost / quantity) + vat_value if quantity else 0
+
+        remaining_stocks.append([remaining_qty])
+        vat_values.append([vat_value])
+        total_costs.append([total_cost])
+        unit_prices.append([calculated_unit_price])
+
+    end_row = 3 + len(products_data)
+
+    batch_update(sheet.id, f"Products!M4:M{end_row}", remaining_stocks, creds)     # Remaining Stocks
+    batch_update(sheet.id, f"Products!Q4:Q{end_row}", vat_values, creds)           # VAT Value
+    batch_update(sheet.id, f"Products!S4:S{end_row}", total_costs, creds)          # Total Cost
+    batch_update(sheet.id, f"Products!P4:P{end_row}", unit_prices, creds)          # Unit Price
+
+
+def run_all_calculations():
+    print("Authenticating and opening sheet...")
+    gc, creds = get_gspread_and_raw_creds()
+    sheet = gc.open_by_key(CORE_SHEET_ID)
+    calc_sales(sheet, creds)      # Existing sales calc
+    calc_products(sheet, creds)   # ✅ New products calc
+
