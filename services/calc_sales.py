@@ -65,17 +65,16 @@ def calc_sales(sheet, creds):
         discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
         discount_value = subtotal * (discount_percentage / 100)
 
-        # Updated total amount calculation as per your request:
         total_amount = subtotal + vat_value - discount_value
 
         commission_rate = seller_commission_map.get(seller_name, 0)
         commission_value = total_amount * commission_rate
 
-        revenue = total_amount - commission_value - vat_value
-
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
-        # ✅ Updated income tax calculation
         income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
+
+        # ✅ Updated revenue calculation
+        revenue = total_amount - income_tax_value - commission_value
 
         unit_prices.append([unit_price])
         total_amounts.append([total_amount])
@@ -93,7 +92,7 @@ def calc_sales(sheet, creds):
     batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT Value
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value (updated logic)
     batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # ✅ Income Tax Value (corrected)
-    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # Revenue (Net)
+    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # ✅ Revenue (Net) - updated logic
 
 def run_calculations():
     print("Authenticating and opening sheet...")
