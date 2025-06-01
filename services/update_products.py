@@ -14,7 +14,7 @@ def batch_update(sheet_id, range_, values, creds):
     body = {'valueInputOption': 'USER_ENTERED', 'data': [{'range': range_, 'values': values}]}
     service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
 
-def calc_products(sheet, creds):
+def update_products(sheet, creds):
     print("Fetching worksheets...")
     products_ws = sheet.worksheet("Products")
     sales_ws = sheet.worksheet("Sales")
