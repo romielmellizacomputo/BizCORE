@@ -72,10 +72,8 @@ def calc_products(sheet, creds):
     batch_update(sheet.id, f"Products!P4:P{end_row}", unit_prices, creds)          # Unit Price
 
 
-def run_all_calculations():
+def run_calculations():
     print("Authenticating and opening sheet...")
     gc, creds = get_gspread_and_raw_creds()
     sheet = gc.open_by_key(CORE_SHEET_ID)
-    calc_sales(sheet, creds)      # Existing sales calc
-    calc_products(sheet, creds)   # ✅ New products calc
-
+    calc_products(sheet, creds)
