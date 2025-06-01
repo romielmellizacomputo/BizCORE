@@ -52,10 +52,10 @@ def update_products(sheet, creds):
         # Total Cost = (Unit Cost × Quantity) + Shipping Fee
         total_cost = (unit_cost * quantity) + shipping_fee
 
-        # VAT per unit = (Total Cost / Quantity) * VAT Rate
-        vat_value = ((total_cost / quantity) * vat_rate) if quantity else 0
+        # Simplified VAT: VAT = Selling Price × VAT Rate
+        vat_value = selling_price * vat_rate
 
-        # Total Price = Selling Price + VAT Value
+        # Total Price = Selling Price + VAT
         total_price = selling_price + vat_value
 
         remaining_stocks.append([remaining_qty])
