@@ -74,7 +74,8 @@ def calc_sales(sheet, creds):
         revenue = total_amount - commission_value - vat_value
 
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
-        income_tax_value = revenue * (income_tax_percentage / 100)
+        # ✅ Updated income tax calculation
+        income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
 
         unit_prices.append([unit_price])
         total_amounts.append([total_amount])
@@ -91,7 +92,7 @@ def calc_sales(sheet, creds):
     batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount Value
     batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT Value
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value (updated logic)
-    batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # Income Tax Value
+    batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # ✅ Income Tax Value (corrected)
     batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # Revenue (Net)
 
 def run_calculations():
