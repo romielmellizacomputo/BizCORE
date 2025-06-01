@@ -1,4 +1,5 @@
 # --- services/calc_sales.py ---
+
 import os
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID
@@ -17,7 +18,10 @@ def batch_update(sheet_id, range_, values, creds):
         'data': [{'range': range_, 'values': values}]
     }
     print(f"Updating range {range_} with {len(values)} rows...")
-    result = service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
+    result = service.spreadsheets().values().batchUpdate(
+        spreadsheetId=sheet_id,
+        body=body
+    ).execute()
     print(f"Update result: {result}")
 
 def calc_sales(sheet, creds):
@@ -62,44 +66,37 @@ def calc_sales(sheet, creds):
 
         revenue = total_amount - discount_value - vat_value - commission_value
 
-        # New: Income Tax % is in Sales!U (index 20)
+        # Income Tax % is in Sales!U (index 20)
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
         income_tax_value = revenue * (income_tax_percentage / 100)
 
-        unit_prices.append([round(unit_price, 2)])
-        total_amounts.append([round(total_amount, 2)])
-        discounts.append([round(discount_value, 2)])
-        vat_values.append([round(vat_value, 2)])
-        commission_values.append([round(commission_value, 2)])
-        revenue_values.append([round(revenue, 2)])
-        income_tax_values.append([round(income_tax_value, 2)])
+        print(f"Row {i} => Product: {product_id}, Qty: {quantity}, Seller: {seller_name}")
+        print(f"  Unit Price: {unit_price}, Total: {total_amount}")
+        print(f"  Discount %: {discount_percentage}, Value: {discount_value}")
+        print(f"  VAT %: {vat_tax_percentage}, Value: {vat_value}")
+        print(f"  Commission %: {commission_rate*100}, Value: {commission_value}")
+        print(f"  Revenue: {revenue}")
+        print(f"  Income Tax %: {income_tax_percentage}, Value: {income_tax_value}")
 
-        if i <= 7:  # Debug first few rows
-            print(f"Row {i} => Product: {product_id}, Qty: {quantity}, Seller: {seller_name}")
-            print(f"  Unit Price: {unit_price}, Total: {total_amount}")
-            print(f"  Discount %: {discount_percentage}, Value: {discount_value}")
-            print(f"  VAT %: {vat_tax_percentage}, Value: {vat_value}")
-            print(f"  Commission %: {commission_rate}, Value: {commission_value}")
-            print(f"  Revenue: {revenue}")
-            print(f"  Income Tax %: {income_tax_percentage}, Value: {income_tax_value}")
+        unit_prices.append([unit_price])
+        total_amounts.append([total_amount])
+        discounts.append([discount_value])
+        vat_values.append([vat_value])
+        commission_values.append([commission_value])
+        revenue_values.append([revenue])
+        income_tax_values.append([income_tax_value])
 
-    end_row = 4 + len(unit_prices) - 1
+    end_row = 3 + len(sales_data)
 
     batch_update(sheet.id, f"Sales!N4:N{end_row}", unit_prices, creds)        # Unit Price
     batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount
-    batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount
-    batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT
-    batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission
+    batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount Value
+    batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT Value
+    batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value
     batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # Income Tax Value
-    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenues_values, creds)           # Revenue (Net)
-
+    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # Revenue (Net)
 
 def run_calculations():
     print("Authenticating and opening sheet...")
-    client, creds = get_gspread_and_raw_creds()
-    sheet = client.open_by_key(CORE_SHEET_ID)
+    sheet, creds = get_gspread_and_raw_creds(CORE_SHEET_ID)
     calc_sales(sheet, creds)
-    print("Calculation complete.")
-
-if __name__ == "__main__":
-    run_calculations()
