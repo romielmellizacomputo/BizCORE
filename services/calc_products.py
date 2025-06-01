@@ -20,16 +20,16 @@ def calc_products(sheet, creds):
     sales_ws = sheet.worksheet("Sales")
 
     print("Fetching data...")
-    products_data = products_ws.get_all_values()[3:]  # Products rows from 4 onwards
-    sales_data = sales_ws.get_all_values()[3:]        # Sales rows from 4 onwards
+    products_data = products_ws.get_all_values()[3:]  # Products rows from 4 onwards (index 3)
+    sales_data = sales_ws.get_all_values()[3:]        # Sales rows from 4 onwards (index 3)
 
     print(f"Loaded {len(products_data)} products, {len(sales_data)} sales rows")
 
     # Map product_id to total quantity sold (from Sales sheet)
     sales_qty_map = {}
     for row in sales_data:
-        product_id = row[11] if len(row) > 11 else ""  # Sales!L
-        quantity_sold = parse_float(row[14]) if len(row) > 14 else 0  # Sales!O
+        product_id = row[11] if len(row) > 11 else ""  # Sales!L (index 11)
+        quantity_sold = parse_float(row[14]) if len(row) > 14 else 0  # Sales!O (index 14)
         if product_id:
             sales_qty_map[product_id] = sales_qty_map.get(product_id, 0) + quantity_sold
 
@@ -39,12 +39,12 @@ def calc_products(sheet, creds):
     total_prices = []
 
     for row in products_data:
-        product_id = row[1] if len(row) > 1 else ""          # Products!B
-        quantity = parse_float(row[11]) if len(row) > 11 else 0  # Products!L
-        unit_cost = parse_float(row[13]) if len(row) > 13 else 0  # Products!N
-        shipping_fee = parse_float(row[17]) if len(row) > 17 else 0  # Products!R
-        vat_rate = parse_float(row[14]) / 100 if len(row) > 14 else 0  # Products!O
-        selling_price = parse_float(row[15]) if len(row) > 15 else 0  # Products!P
+        product_id = row[1] if len(row) > 1 else ""            # Products!B (index 1)
+        quantity = parse_float(row[11]) if len(row) > 11 else 0   # Products!L (index 11)
+        unit_cost = parse_float(row[13]) if len(row) > 13 else 0  # Products!N (index 13)
+        shipping_fee = parse_float(row[17]) if len(row) > 17 else 0  # Products!R (index 17)
+        vat_rate = parse_float(row[14]) / 100 if len(row) > 14 else 0  # Products!O (index 14)
+        selling_price = parse_float(row[15]) if len(row) > 15 else 0   # Products!P (index 15)
 
         total_sold_qty = sales_qty_map.get(product_id, 0)
         remaining_qty = quantity - total_sold_qty
@@ -65,10 +65,10 @@ def calc_products(sheet, creds):
 
     end_row = 3 + len(products_data)
 
-    batch_update(sheet.id, f"Products!M4:M{end_row}", remaining_stocks, creds)     # Remaining Stocks
-    batch_update(sheet.id, f"Products!Q4:Q{end_row}", total_prices, creds)         # Total Price (Selling Price + VAT)
-    batch_update(sheet.id, f"Products!R4:R{end_row}", vat_values, creds)           # VAT Value (optional, shifted to R to avoid overwrite)
-    batch_update(sheet.id, f"Products!S4:S{end_row}", total_costs, creds)          # Total Cost
+    batch_update(sheet.id, f"Products!M4:M{end_row}", remaining_stocks, creds)     # Remaining Stocks (M column)
+    batch_update(sheet.id, f"Products!Q4:Q{end_row}", total_prices, creds)         # Total Price (Q column)
+    batch_update(sheet.id, f"Products!R4:R{end_row}", vat_values, creds)           # VAT Value (R column)
+    batch_update(sheet.id, f"Products!S4:S{end_row}", total_costs, creds)          # Total Cost (S column)
 
 def run_calculations():
     print("Authenticating and opening sheet...")
