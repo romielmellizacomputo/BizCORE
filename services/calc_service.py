@@ -103,7 +103,7 @@ def calc_sales(sheet, creds):
 
         total_amount = total_sales + vat_value
 
-        discount_rate = parse_float(row[6]) / 100 if len(row) > 6 else 0  # Sales!G
+        discount_rate = parse_float(row[14]) / 100 if len(row) > 6 else 0  # Sales!G
         discount_value = total_amount * discount_rate
 
         commission_rate = seller_commission_map.get(seller_name, 0)
