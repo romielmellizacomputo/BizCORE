@@ -1,4 +1,4 @@
-name: BizCORE SALES UPDATES
+name: BizCORE PRODUCTS UPDATES
 
 on:
   workflow_dispatch:
@@ -23,18 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: ⚙️ Run CORE Calculations
+      - name: ⚙️ Run Products Calculations
         env:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
         run: |
-          python -c "from services.calc_service import run_calculations; run_calculations()"
-
-
-      - name: 🔁 Sync CORE to Businesses (based on permissions)
-        env:
-          BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
-          CORE: ${{ secrets.CORE }}
-          CORE_HANDLER: ${{ secrets.CORE_HANDLER }}
-        run: |
-          python -c "from services.sales_calc import run_sync; run_sync()"
+          python -c "from services.calc_products import run_calculations; run_calculations()"
