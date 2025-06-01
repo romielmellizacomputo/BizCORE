@@ -54,15 +54,18 @@ def calc_sales(sheet, creds):
         seller_name = row[9] if len(row) > 9 else ""        # Sales!J
 
         unit_price = product_price_map.get(product_id, 0)
-        total_amount = unit_price * quantity
+        subtotal = unit_price * quantity
+
+        vat_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0   # Sales!S
+        vat_value = subtotal * (vat_tax_percentage / 100)
+
+        total_amount = subtotal + vat_value
+
         commission_rate = seller_commission_map.get(seller_name, 0)
         commission_value = total_amount * commission_rate
 
         discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
         discount_value = total_amount * (discount_percentage / 100)
-
-        vat_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0   # Sales!S
-        vat_value = total_amount * (vat_tax_percentage / 100)
 
         revenue = total_amount - discount_value - vat_value - commission_value
 
