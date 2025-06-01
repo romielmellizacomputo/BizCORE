@@ -37,4 +37,4 @@ jobs:
           CORE: ${{ secrets.CORE }}
           CORE_HANDLER: ${{ secrets.CORE_HANDLER }}
         run: |
-          python -c "from services.sales_calc import run_sync; run_sync()"
+          python -c "from services.calculate_sales import run_sync; run_sync()"
