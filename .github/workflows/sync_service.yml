@@ -34,6 +34,3 @@ jobs:
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
           python services/sync_service.py
 
-        run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=creds.json
-          python services/sync_service.py
