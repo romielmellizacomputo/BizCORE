@@ -66,17 +66,8 @@ def calc_sales(sheet, creds):
 
         revenue = total_amount - discount_value - vat_value - commission_value
 
-        # Income Tax % is in Sales!U (index 20)
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
         income_tax_value = revenue * (income_tax_percentage / 100)
-
-        print(f"Row {i} => Product: {product_id}, Qty: {quantity}, Seller: {seller_name}")
-        print(f"  Unit Price: {unit_price}, Total: {total_amount}")
-        print(f"  Discount %: {discount_percentage}, Value: {discount_value}")
-        print(f"  VAT %: {vat_tax_percentage}, Value: {vat_value}")
-        print(f"  Commission %: {commission_rate*100}, Value: {commission_value}")
-        print(f"  Revenue: {revenue}")
-        print(f"  Income Tax %: {income_tax_percentage}, Value: {income_tax_value}")
 
         unit_prices.append([unit_price])
         total_amounts.append([total_amount])
@@ -98,5 +89,6 @@ def calc_sales(sheet, creds):
 
 def run_calculations():
     print("Authenticating and opening sheet...")
-    sheet, creds = get_gspread_and_raw_creds(CORE_SHEET_ID)
+    gc, creds = get_gspread_and_raw_creds()
+    sheet = gc.open_by_key(CORE_SHEET_ID)
     calc_sales(sheet, creds)
