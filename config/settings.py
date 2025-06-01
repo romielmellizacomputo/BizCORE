@@ -5,8 +5,8 @@ CORE_SHEET_ID = os.environ.get("CORE")
 CORE_HANDLER_SHEET_ID = os.environ.get("CORE_HANDLER")
 
 PERMISSION_SHEET_MAP = {
-    "Products": ("Products", "G", "R"),         
-    "Sales": ("Sales", "G", "W"),             
+    "Products": ("Products", "G", "S"),         
+    "Sales": ("Sales", "G", "X"),             
     "Expenses": ("Expenses", "G", "R"),       
     "Suppliers": ("Suppliers", "G", "R"),     
     "Sellers": ("Sellers", "G", "S"),          
