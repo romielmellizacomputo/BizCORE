@@ -35,7 +35,7 @@ def calc_sales(sheet, creds):
 
     print(f"Loaded {len(sales_data)} sales rows, {len(products_data)} products, {len(sellers_data)} sellers")
 
-    # Product price map: product_id at index 1, price at index 14 (column O)
+    # Product price map: product_id at index 1, price at index 16 (column Q)
     product_price_map = {row[1]: parse_float(row[16]) for row in products_data if len(row) > 16}
 
     # Seller commission map: seller name at index 6 (G), commission rate % at index 13 (N)
@@ -64,17 +64,18 @@ def calc_sales(sheet, creds):
         commission_rate = seller_commission_map.get(seller_name, 0)
         commission_value = total_amount * commission_rate
 
-        revenue = total_amount - commission_value
-
         income_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0  # Sales!S
-        income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
+        income_tax_value = total_amount * (income_tax_percentage / 100)
+
+        # ✅ Updated revenue formula
+        revenue = total_amount - commission_value - income_tax_value
 
         unit_prices.append([unit_price])
         total_amounts.append([total_amount])
         discounts.append([discount_value])
         commission_values.append([commission_value])
-        revenue_values.append([revenue])
         income_tax_values.append([income_tax_value])
+        revenue_values.append([revenue])
 
     end_row = 3 + len(sales_data)
 
