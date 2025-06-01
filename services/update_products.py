@@ -74,4 +74,4 @@ def run_calculations():
     print("Authenticating and opening sheet...")
     gc, creds = get_gspread_and_raw_creds()
     sheet = gc.open_by_key(CORE_SHEET_ID)
-    calc_products(sheet, creds)
+    update_products(sheet, creds)
