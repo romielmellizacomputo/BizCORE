@@ -32,8 +32,9 @@ def calc_investments(sheet, creds):
         tax_rate = parse_float(row[14]) / 100       # O column is index 14 (convert % to decimal)
 
         interest_amount = investment_amount * interest_rate
-        net = interest_amount * tax_rate
-        proceeds = investment_amount + net
+        tax_amount = interest_amount * tax_rate
+        net_interest = interest_amount - tax_amount
+        proceeds = investment_amount + net_interest
 
         proceeds_values.append([round(proceeds, 2)])  # Round to 2 decimals for clarity
 
@@ -42,6 +43,7 @@ def calc_investments(sheet, creds):
     print(f"Updating Proceeds column P4:P{end_row} with calculated values...")
     batch_update(sheet.id, f"Investments!P4:P{end_row}", proceeds_values, creds)
     print("Update complete.")
+
 
 def run_calculations():
     print("Authenticating and opening sheet...")
