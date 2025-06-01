@@ -1,4 +1,4 @@
-name: BizCORE SALES PRODUCTS
+name: BizCORE PRODUCTS UPDATE
 
 on:
   workflow_dispatch:
