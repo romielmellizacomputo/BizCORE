@@ -56,8 +56,10 @@ def calculate_sales():
     batch_update(CORE_SHEET_ID, "Sales!V4:V", taxes, creds)
     batch_update(CORE_SHEET_ID, "Sales!W4:W", revenues, creds)
 
+# At the bottom of services/sales_calc.py
+
 def run_sync():
-    calculate_whatever()
+    calculate_sales()
 
 if __name__ == "__main__":
     run_sync()
