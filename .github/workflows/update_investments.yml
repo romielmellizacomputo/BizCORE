@@ -28,4 +28,4 @@ jobs:
           BIZNEST_AGENT: ${{ secrets.BIZNEST_AGENT }}
           CORE: ${{ secrets.CORE }}
         run: |
-          python -c "from services.update_investments import run_calculations; run_calculations()"
+          python -c "from services.calc_investments import run_calculations; run_calculations()"
