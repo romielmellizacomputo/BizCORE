@@ -1,5 +1,3 @@
-# --- services/calc_sales.py ---
-
 import os
 from auth.google_auth import get_gspread_and_raw_creds
 from config.settings import CORE_SHEET_ID
@@ -46,7 +44,6 @@ def calc_sales(sheet, creds):
     unit_prices = []
     total_amounts = []
     discounts = []
-    vat_values = []
     commission_values = []
     revenue_values = []
     income_tax_values = []
@@ -59,27 +56,22 @@ def calc_sales(sheet, creds):
         unit_price = product_price_map.get(product_id, 0)
         subtotal = unit_price * quantity
 
-        vat_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0   # Sales!S
-        vat_value = subtotal * (vat_tax_percentage / 100)
-
         discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
         discount_value = subtotal * (discount_percentage / 100)
 
-        total_amount = subtotal + vat_value - discount_value
+        total_amount = subtotal - discount_value
 
         commission_rate = seller_commission_map.get(seller_name, 0)
         commission_value = total_amount * commission_rate
 
-        income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
-        income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
+        revenue = total_amount - commission_value
 
-        # ✅ Updated revenue calculation
-        revenue = total_amount - income_tax_value - commission_value
+        income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0  # Sales!U (was previously W)
+        income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
 
         unit_prices.append([unit_price])
         total_amounts.append([total_amount])
         discounts.append([discount_value])
-        vat_values.append([vat_value])
         commission_values.append([commission_value])
         revenue_values.append([revenue])
         income_tax_values.append([income_tax_value])
@@ -89,10 +81,9 @@ def calc_sales(sheet, creds):
     batch_update(sheet.id, f"Sales!N4:N{end_row}", unit_prices, creds)        # Unit Price
     batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount (updated calc)
     batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount Value
-    batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)         # VAT Value
-    batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value (updated logic)
-    batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # ✅ Income Tax Value (corrected)
-    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # ✅ Revenue (Net) - updated logic
+    batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value
+    batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # Income Tax Value
+    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # Revenue (Net)
 
 def run_calculations():
     print("Authenticating and opening sheet...")
