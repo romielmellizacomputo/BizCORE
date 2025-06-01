@@ -67,7 +67,7 @@ def calc_sales(sheet, creds):
         discount_percentage = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
         discount_value = total_amount * (discount_percentage / 100)
 
-        revenue = total_amount - discount_value - commission_value
+        revenue = total_amount - discount_value - vat_value - commission_value
 
         income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0
         income_tax_value = revenue * (income_tax_percentage / 100)
