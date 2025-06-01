@@ -15,7 +15,7 @@ def batch_update(sheet_id, range_, values, creds):
     body = {'valueInputOption': 'USER_ENTERED', 'data': [{'range': range_, 'values': values}]}
     service.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
 
-def update_investments(sheet, creds):
+def calc_investments(sheet, creds):
     print("Fetching Investments worksheet...")
     invest_ws = sheet.worksheet("Investments")
 
@@ -47,4 +47,4 @@ def run_calculations():
     print("Authenticating and opening sheet...")
     gc, creds = get_gspread_and_raw_creds()
     sheet = gc.open_by_key(CORE_SHEET_ID)
-    update_investments(sheet, creds)
+    calc_investments(sheet, creds)
