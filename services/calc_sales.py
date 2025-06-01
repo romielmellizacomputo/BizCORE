@@ -66,7 +66,7 @@ def calc_sales(sheet, creds):
 
         revenue = total_amount - commission_value
 
-        income_tax_percentage = parse_float(row[20]) if len(row) > 20 else 0  # Sales!U (was previously W)
+        income_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0  # Sales!S
         income_tax_value = (unit_price * quantity - discount_value) * (income_tax_percentage / 100)
 
         unit_prices.append([unit_price])
@@ -79,11 +79,11 @@ def calc_sales(sheet, creds):
     end_row = 3 + len(sales_data)
 
     batch_update(sheet.id, f"Sales!N4:N{end_row}", unit_prices, creds)        # Unit Price
-    batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount (updated calc)
+    batch_update(sheet.id, f"Sales!P4:P{end_row}", total_amounts, creds)      # Total Amount
     batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)          # Discount Value
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds)  # Commission Value
-    batch_update(sheet.id, f"Sales!V4:V{end_row}", income_tax_values, creds)  # Income Tax Value
-    batch_update(sheet.id, f"Sales!W4:W{end_row}", revenue_values, creds)     # Revenue (Net)
+    batch_update(sheet.id, f"Sales!T4:T{end_row}", income_tax_values, creds)  # Income Tax Value
+    batch_update(sheet.id, f"Sales!U4:U{end_row}", revenue_values, creds)     # Revenue (Net)
 
 def run_calculations():
     print("Authenticating and opening sheet...")
