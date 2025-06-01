@@ -27,9 +27,13 @@ jobs:
       - name: Set up Google Credentials
         run: |
           echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}" > creds.json
-        shell: bash
 
       - name: Run sync service
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS=creds.json
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          python services/sync_service.py
+
         run: |
           export GOOGLE_APPLICATION_CREDENTIALS=creds.json
           python services/sync_service.py
