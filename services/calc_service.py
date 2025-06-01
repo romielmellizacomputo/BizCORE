@@ -71,23 +71,33 @@ def calc_products(sheet, creds):
 def calc_sales(sheet, creds):
     sales_ws = sheet.worksheet("Sales")
     products_ws = sheet.worksheet("Products")
+    sellers_ws = sheet.worksheet("Sellers")
 
     sales_data = sales_ws.get_all_values()[3:]
     products_data = products_ws.get_all_values()[3:]
+    sellers_data = sellers_ws.get_all_values()[3:]
 
-    # Unit Price is in Products!O (index 14)
-    product_price_map = {row[1]: parse_float(row[14]) for row in products_data if len(row) > 14}
+    # Product prices
+    product_price_map = {row[1]: parse_float(row[14]) for row in products_data if len(row) > 14}  # Products!O
+
+    # Seller commission rate map
+    seller_commission_map = {row[6]: parse_float(row[13]) / 100 for row in sellers_data if len(row) > 13}  # Sellers!N (13)
 
     unit_prices = []
     total_amounts = []
     revenues = []
+    commission_values = []
+    commissions_for_I = []
 
     for row in sales_data:
         product_id = row[11] if len(row) > 11 else ""  # Sales!L
         quantity = parse_float(row[14]) if len(row) > 14 else 0  # Sales!O
+        seller_name = row[9] if len(row) > 9 else ""  # Sales!J
 
         unit_price = product_price_map.get(product_id, 0)
         total_amount = unit_price * quantity
+        commission_rate = seller_commission_map.get(seller_name, 0)
+        commission_value = total_amount * commission_rate
 
         q = parse_float(row[16]) if len(row) > 16 else 0  # Sales!Q
         r = parse_float(row[17]) if len(row) > 17 else 0  # Sales!R
@@ -98,11 +108,14 @@ def calc_sales(sheet, creds):
         unit_prices.append([round(unit_price, 2)])
         total_amounts.append([round(total_amount, 2)])
         revenues.append([round(revenue, 2)])
+        commission_values.append([round(commission_value, 2)])
+        commissions_for_I.append([round(commission_value, 2)])
 
     batch_update(sheet.id, "Sales!N4:N", unit_prices, creds)
     batch_update(sheet.id, "Sales!P4:P", total_amounts, creds)
     batch_update(sheet.id, "Sales!S4:S", revenues, creds)
-
+    batch_update(sheet.id, "Sales!O4:O", commission_values, creds)
+    batch_update(sheet.id, "Sales!I4:I", commissions_for_I, creds)
 
 def calc_sellers(sheet, creds):
     sellers_ws = sheet.worksheet("Sellers")
@@ -116,17 +129,17 @@ def calc_sellers(sheet, creds):
     commissions = []
 
     for seller_row in sellers_data:
-        name = seller_row[6] if len(seller_row) > 6 else ""  # G
+        name = seller_row[6] if len(seller_row) > 6 else ""  # Sellers!G
 
         qty_sum = 0
         sale_sum = 0
         comm_sum = 0
 
         for sale in sales_data:
-            if len(sale) > 7 and sale[7] == name:  # H
-                qty = parse_float(sale[14]) if len(sale) > 14 else 0  # O
-                sale_amt = parse_float(sale[18]) if len(sale) > 18 else 0  # S
-                comm = parse_float(sale[8]) if len(sale) > 8 else 0  # I
+            if len(sale) > 7 and sale[7] == name:  # Sales!H matches Sellers!G
+                qty = parse_float(sale[14]) if len(sale) > 14 else 0  # Sales!O
+                sale_amt = parse_float(sale[18]) if len(sale) > 18 else 0  # Sales!S
+                comm = parse_float(sale[8]) if len(sale) > 8 else 0  # Sales!I
 
                 qty_sum += qty
                 sale_sum += sale_amt
@@ -138,7 +151,7 @@ def calc_sellers(sheet, creds):
 
     batch_update(sheet.id, "Sellers!L4:L", items_sold, creds)
     batch_update(sheet.id, "Sellers!M4:M", total_sales, creds)
-    batch_update(sheet.id, "Sellers!N4:N", commissions, creds)
+    batch_update(sheet.id, "Sellers!O4:O", commissions, creds) 
 
 
 def calc_investments(sheet, creds):
