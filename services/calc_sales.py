@@ -56,11 +56,11 @@ def calc_sales(sheet, creds):
         commission_rate = seller_commission_map.get(seller_name, 0)
         commission_value = total_amount * commission_rate
 
-        # Assuming discount is in Sales!Q (index 16) as a percentage, adjust as needed
+        # Assuming discount is in Sales!Q (index 16) as a percentage
         discount_percentage = parse_float(row[16]) if len(row) > 16 else 0
         discount_value = total_amount * (discount_percentage / 100)
 
-        # Assuming VAT tax percentage is in Sales!S (index 18), adjust as needed
+        # Assuming VAT tax percentage is in Sales!S (index 18)
         vat_tax_percentage = parse_float(row[18]) if len(row) > 18 else 0
         vat_value = total_amount * (vat_tax_percentage / 100)
 
@@ -73,7 +73,7 @@ def calc_sales(sheet, creds):
         commission_values.append([round(commission_value, 2)])
         revenues.append([round(revenue, 2)])
 
-        if i <= 7:  # Print first 4 rows for debug (rows 4,5,6,7)
+        if i <= 7:  # Print first 4 rows for debug (rows 4–7)
             print(f"Row {i} => Product: {product_id}, Qty: {quantity}, Seller: {seller_name}")
             print(f"  Unit Price: {unit_price}, Total: {total_amount}")
             print(f"  Discount %: {discount_percentage}, Discount Value: {discount_value}")
@@ -89,7 +89,7 @@ def calc_sales(sheet, creds):
     batch_update(sheet.id, f"Sales!R4:R{end_row}", discounts, creds)         # Discount (col R)
     batch_update(sheet.id, f"Sales!T4:T{end_row}", vat_values, creds)        # VAT (col T)
     batch_update(sheet.id, f"Sales!I4:I{end_row}", commission_values, creds) # Commission (col I)
-    batch_update(sheet.id, f"Sales!U4:U{end_row}", revenues, creds)          # Revenue (col U), add if needed
+    batch_update(sheet.id, f"Sales!V4:V{end_row}", revenues, creds)          # Revenue (col V), not col U (Income Tax %)
 
 def run_calculations():
     print("Authenticating and opening sheet...")
