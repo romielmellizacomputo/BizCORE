@@ -1,6 +1,6 @@
-# BizNestSheets-CORE
+# BizCORE
 
-**Business Nested Sheets – Centralized Online Repository for E-Systems**  
+**Business Core – Centralized Online Repository for E-Systems**  
 A project of **Se-Preneurs Alliance**  
 Developed & Maintained by: **Romiel Melliza Computo**
 
@@ -8,7 +8,7 @@ Developed & Maintained by: **Romiel Melliza Computo**
 
 ## 🌐 About the Project
 
-**BizNestSheets-CORE** is the central automation engine of **BizNestSheets**, a powerful and intuitive suite of digital tools designed to **automate and streamline key business processes**. It's **100% free**, built with **professional-grade automation** systems for businesses, cooperatives, schools, freelancers, and organizations seeking digital transformation without the hefty price tag.
+**BizCORE** is the central automation engine, a powerful and intuitive suite of digital tools designed to **automate and streamline key business processes**. It's **100% free**, built with **professional-grade automation** systems for businesses, cooperatives, schools, freelancers, and organizations seeking digital transformation without the hefty price tag.
 
 Developed and maintained by the **Se-Preneurs Alliance**, this platform is fueled by a vision:  
 > “Empower grassroots entrepreneurs with world-class systems at no cost.”
@@ -18,14 +18,14 @@ Developed and maintained by the **Se-Preneurs Alliance**, this platform is fuele
 ## 🕰️ Project History
 
 - **4th Quarter of 2020**: Initial development began under the **Sinking Funds PH** organization as part of a grassroots digital finance initiative.  
-- **Early 2021**: Officially launched and adopted for operational use by **Sinking Funds PH**.  
+- **Early 2021**: Officially launched and adopted for operational use.  
 - **Mid-2021 to Present**: Maintained and actively used by the **Se-Preneurs Alliance**, powering digital automation for its member organizations.
 
 ---
 
 ## 💼 Automate Real Business Processes (Not Just Spreadsheets)
 
-BizNestSheets goes beyond simple templates. Each system is thoughtfully designed to manage actual business operations using **smart logic, visual dashboards, and integrated workflows.** Here's what you can streamline:
+BizCORE goes beyond simple templates. Each system is thoughtfully designed to manage actual business operations using **smart logic, visual dashboards, and integrated workflows.** Here's what you can streamline:
 
 ---
 
@@ -127,10 +127,10 @@ BizNestSheets goes beyond simple templates. Each system is thoughtfully designed
 
 ---
 
-## 🎁 Why Use BizNestSheets?
+## 🎁 Why Use BizCORE?
 
 - ✅ **100% Free to Use** – No hidden fees, ads, or limits  
-- ✅ **Built by a Business Automation Expert** – Designed by a Software Quality Assurance with real business use in mind  
+- ✅ **Built by a Business Minded & a Software QA** – Designed by a Software Quality Assurance with real business use in mind  
 - ✅ **End-to-End Operations** – Covers front office to back office and everything in between  
 - ✅ **Used by 40+ Orgs** – Trusted by cooperatives, SMEs, student groups, and freelancers  
 - ✅ **Fast Setup** – Use as-is or tailor to your org in minutes  
@@ -178,7 +178,7 @@ Violations will lead to permanent access revocation and legal action.
 
 ## 🧠 Final Thought
 
-**BizNestSheets isn’t just a product — it’s a movement.**  
+**BizCORE isn’t just a product — it’s a movement.**  
 We're redefining how grassroots businesses can grow, lead, and scale — **without paying a single peso.**
 
 If you're ready to move from spreadsheets to **full-blown automation**, join the Se-Preneurs Alliance.  
@@ -197,7 +197,7 @@ Copyright (c) 2021-present
 Romiel Melliza Computo  
 Se-Preneurs Alliance
 
-This software and all associated tools, scripts, automation, and components within the BizNestSheets-CORE repository are the exclusive property of Romiel Melliza Computo and the Se-Preneurs Alliance. By accessing or requesting any component of this repository, you agree to the following terms:
+This software and all associated tools, scripts, automation, and components within the BizCORE repository are the exclusive property of Romiel Melliza Computo and the Se-Preneurs Alliance. By accessing or requesting any component of this repository, you agree to the following terms:
 
 1. **RESTRICTED USE**  
    - This software is provided solely to **verified members** of the Se-Preneurs Alliance.  
@@ -213,14 +213,14 @@ This software and all associated tools, scripts, automation, and components with
 
 4. **INTELLECTUAL PROPERTY RIGHTS**  
    - All intellectual property rights are retained by Romiel Melliza Computo.  
-   - The name “BizNestSheets”, “Se-Preneurs Alliance”, and all associated tools are **trademarks** of their respective owner.
+   - The name “BizCORE”, “Se-Preneurs Alliance”, and all associated tools are **trademarks** of their respective owner.
 
 5. **LEGAL CONSEQUENCES**  
    - Any person or group found violating this license may be subject to legal action under Philippine law and international IP enforcement regulations.  
    - This includes individuals caught distributing, sharing, or replicating source code without written consent.
 
 6. **PERMISSION TO ACCESS**  
-   - To request access to any BizNestSheets-CORE tool:  
+   - To request access to any BizCORE tool:  
      - Send a request to **romielmellizacomputo@gmail.com**  
      - Include your **Se-Preneurs Alliance Membership ID**  
      - Specify the tool you wish to use  
