@@ -1,3 +1,5 @@
+![BizCORE - Dashboard](https://github.com/user-attachments/assets/db86c677-8144-4447-bd18-b96936bd18c3)
+
 # BizCORE - Sheets Version
 
 **Business Core – Centralized Online Repository for E-Systems**  
