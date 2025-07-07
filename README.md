@@ -1,8 +1,10 @@
-# BizCORE
+# BizCORE - Sheets Version
 
 **Business Core – Centralized Online Repository for E-Systems**  
 A project of **Se-Preneurs Alliance**  
 Developed & Maintained by: **Romiel Melliza Computo**
+
+> **⚠️ IMPORTANT NOTICE:** This is the Google Sheets version of the Se-Preneurs Alliance BizCORE from **www.sepreneurs.com**. We still recommend using our **online platform** for the complete experience.
 
 ---
 
@@ -11,7 +13,7 @@ Developed & Maintained by: **Romiel Melliza Computo**
 **BizCORE** is the central automation engine, a powerful and intuitive suite of digital tools designed to **automate and streamline key business processes**. It's **100% free**, built with **professional-grade automation** systems for businesses, cooperatives, schools, freelancers, and organizations seeking digital transformation without the hefty price tag.
 
 Developed and maintained by the **Se-Preneurs Alliance**, this platform is fueled by a vision:  
-> “Empower grassroots entrepreneurs with world-class systems at no cost.”
+> "Empower grassroots entrepreneurs with world-class systems at no cost."
 
 ---
 
@@ -170,7 +172,8 @@ Violations will lead to permanent access revocation and legal action.
 
 ## 📬 Connect with Us
 
-- 🌍 **Official Page:** [facebook.com/sepreneurs](https://www.facebook.com/sepreneurs)  
+- 🌍 **Official Website:** [www.sepreneurs.com](https://www.sepreneurs.com)  
+- 📱 **Official Page:** [facebook.com/sepreneurs](https://www.facebook.com/sepreneurs)  
 - 📧 **Email Support:** romielmellizacomputo@gmail.com  
 - 👤 **Platform Creator:** [Romiel Melliza Computo](https://www.linkedin.com/in/romielcomputo)
 
@@ -178,11 +181,11 @@ Violations will lead to permanent access revocation and legal action.
 
 ## 🧠 Final Thought
 
-**BizCORE isn’t just a product — it’s a movement.**  
+**BizCORE isn't just a product — it's a movement.**  
 We're redefining how grassroots businesses can grow, lead, and scale — **without paying a single peso.**
 
 If you're ready to move from spreadsheets to **full-blown automation**, join the Se-Preneurs Alliance.  
-Because your business deserves better — and now it’s possible.
+Because your business deserves better — and now it's possible.
 
 > **No-code. No-cost. No-limits.**
 
@@ -213,7 +216,7 @@ This software and all associated tools, scripts, automation, and components with
 
 4. **INTELLECTUAL PROPERTY RIGHTS**  
    - All intellectual property rights are retained by Romiel Melliza Computo.  
-   - The name “BizCORE”, “Se-Preneurs Alliance”, and all associated tools are **trademarks** of their respective owner.
+   - The name "BizCORE", "Se-Preneurs Alliance", and all associated tools are **trademarks** of their respective owner.
 
 5. **LEGAL CONSEQUENCES**  
    - Any person or group found violating this license may be subject to legal action under Philippine law and international IP enforcement regulations.  
@@ -227,10 +230,10 @@ This software and all associated tools, scripts, automation, and components with
    - Access will be reviewed and granted if you meet the eligibility requirements.
 
 7. **NO WARRANTY**  
-   - This software is provided “as is” without warranty of any kind.  
+   - This software is provided "as is" without warranty of any kind.  
    - The developer is not responsible for any direct or indirect damage resulting from the use or misuse of this software.
 
 ---
 
-To learn more or stay updated, visit our Facebook page:  
-**https://www.facebook.com/sepreneurs**
+To learn more or stay updated, visit our website:  
+**https://www.sepreneurs.com**
